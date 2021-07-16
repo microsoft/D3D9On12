@@ -1,0 +1,51 @@
+﻿<?xml version='1.0' encoding='utf-8' standalone='yes'?>
+<assembly
+    xmlns="urn:schemas-microsoft-com:asm.v3"
+    xmlns:win="http://manifests.microsoft.com/win/2004/08/windows/events"
+    xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    manifestVersion="1.0"
+    >
+  <assemblyIdentity
+      buildType="$(build.buildType)"
+      language="neutral"
+      name="Microsoft-Windows-DirectX-Direct3D9on12"
+      processorArchitecture="$(build.arch)"
+      publicKeyToken="$(Build.WindowsPublicKeyToken)"
+      version="$(build.version)"
+      versionScope="nonSxS"
+      />
+  <file
+      destinationPath="$(runtime.system32)\"
+      importPath="$(build.nttree)\"
+      name="d3d9on12.dll"
+      sourceName="d3d9on12.dll"
+      sourcePath=".\"
+      >
+    <signatureInfo>
+      <signatureDescriptor PETrust="true"/>
+    </signatureInfo>
+  </file>
+  <localization>
+    <resources culture="en-US">
+      <stringTable>
+        <string
+            id="displayName0"
+            value="Direct3D9on12"
+            />
+        <string
+            id="description1"
+            value="Direct3D D3D9 DDI to D3D12 API Mapper"
+            />
+        <string
+            id="displayName2"
+            value="WRP_FILE_DEFAULT_SDDL"
+            />
+        <string
+            id="description3"
+            value="Default SDDL for Windows Resource Protected file"
+            />
+      </stringTable>
+    </resources>
+  </localization>
+</assembly>
