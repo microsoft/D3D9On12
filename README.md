@@ -8,7 +8,7 @@ Note that D3D9On12 is an *enlightened* D3D9 driver, and there are several places
 
 For more details about D3D9On12, see:
 * [D3D Translation Layer spec](https://github.com/microsoft/DirectX-Specs/blob/master/d3d/TranslationLayerResourceInterop.md)
-* [D3D9On12 blog posts](https://devblogs.microsoft.com/directx/coming-to-directx-12-d3d9on12-and-d3d9on12-resource-interop-apis/)
+* [D3D9On12 blog posts](https://devblogs.microsoft.com/directx/coming-to-directx-12-d3d9on12-and-d3d11on12-resource-interop-apis/)
 
 Make sure that you visit the [DirectX Landing Page](https://devblogs.microsoft.com/directx/landing-page/) for more resources for DirectX developers.
 
