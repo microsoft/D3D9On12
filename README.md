@@ -8,7 +8,7 @@ Note that D3D9On12 is an *enlightened* D3D9 driver, and there are several places
 
 For more details about D3D9On12, see:
 * [D3D Translation Layer spec](https://github.com/microsoft/DirectX-Specs/blob/master/d3d/TranslationLayerResourceInterop.md)
-* [D3D9On12 blog posts](https://devblogs.microsoft.com/directx/coming-to-directx-12-d3d9on12-and-d3d9on12-resource-interop-apis/)
+* [D3D9On12 blog posts](https://devblogs.microsoft.com/directx/coming-to-directx-12-d3d9on12-and-d3d11on12-resource-interop-apis/)
 
 Make sure that you visit the [DirectX Landing Page](https://devblogs.microsoft.com/directx/landing-page/) for more resources for DirectX developers.
 
@@ -52,7 +52,7 @@ Note that in order to use your custom version of D3D9on12 you will also need to 
 ## Why open source?
 
 The D3D9On12 mapping layer is included as an operating system component of Windows 10. Over the years and Windows 10 releases, it has grown in functionality, to the point where it is a complete and relatively performant implementation of a D3D9 driver. We are choosing to release the source to this component for two primary reasons:
-1. To enable the community to contribute bugfixes and further performance improvements, which will improve the stability and performance of Windows 10. See [CONTRIBUTING](contributing.md).
+1. To enable the community to contribute bugfixes and further performance improvements, which will improve the stability and performance of Windows 10. See [CONTRIBUTING](CONTRIBUTING.md).
 2. To serve as an example of how to use the D3D12TranslationLayer library.
 
 ### What can you do with this?
