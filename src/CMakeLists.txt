@@ -11,6 +11,10 @@ file(GLOB_RECURSE EXTERNAL_INC ../external/*.h ../external/*.hpp)
 
 add_library(d3d9on12 SHARED ${SRC} ${INC} ${INL} ${EXTERNAL_INC} d3d9on12.rc d3d9on12.def)
 
+if (CMAKE_VERSION VERSION_GREATER 3.16)
+	target_precompile_headers(d3d9on12 PRIVATE ../include/pch.h)
+endif()
+
 FetchContent_Declare(
     d3d12translationlayer
     GIT_REPOSITORY https://github.com/microsoft/D3D12TranslationLayer.git
