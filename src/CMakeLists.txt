@@ -14,7 +14,7 @@ add_library(d3d9on12 SHARED ${SRC} ${INC} ${INL} ${EXTERNAL_INC} d3d9on12.rc d3d
 FetchContent_Declare(
     d3d12translationlayer
     GIT_REPOSITORY https://github.com/microsoft/D3D12TranslationLayer.git
-    GIT_TAG        3bc4d17fc83ccbbe341a3446b9f66999076b7a2b
+    GIT_TAG        d27b59d5e9b28fe001c39dafa7ab573fbcaf416c
 )
 FetchContent_MakeAvailable(d3d12translationlayer)
 
