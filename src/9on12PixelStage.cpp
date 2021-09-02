@@ -315,11 +315,13 @@ namespace D3D9on12
         {
             // Rasterizer states  
         case D3DRS_FILLMODE:
+            if (dwValue < 1 || dwValue > 3) dwValue = D3DFILL_SOLID;
             m_rasterStates.SetFillMode(static_cast<D3DFILLMODE>(dwValue));
             m_rasterizerStateID.FillMode = dwValue;
             m_dirtyFlags.RasterizerState = true;
             break;
         case D3DRS_CULLMODE:
+            if (dwValue < 1 || dwValue > 3) dwValue = D3DCULL_NONE;
             m_rasterizerStateID.CullMode = dwValue;
             m_dirtyFlags.RasterizerState = true;
             break;
