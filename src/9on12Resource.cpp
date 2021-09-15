@@ -1046,6 +1046,7 @@ namespace D3D9on12
             if (createArgs.Flags2.CrossAdapter)
             {
                 assert(createArgs.Flags.SharedResource);
+                m_TranslationLayerCreateArgs.m_heapDesc.Properties = CD3DX12_HEAP_PROPERTIES(D3D12_CPU_PAGE_PROPERTY_NOT_AVAILABLE, D3D12_MEMORY_POOL_L0);
                 m_TranslationLayerCreateArgs.m_heapDesc.Flags |= D3D12_HEAP_FLAG_SHARED_CROSS_ADAPTER;
                 m_TranslationLayerCreateArgs.m_desc12.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
                 m_TranslationLayerCreateArgs.m_desc12.Flags |= D3D12_RESOURCE_FLAG_ALLOW_CROSS_ADAPTER;
