@@ -22,8 +22,6 @@ namespace D3D9on12
 
         UINT GetMaxInputStreams() { return m_vpMaxInputStreams; }
 
-        FLOAT GetFilterRangeMultiplier(D3D12_VIDEO_PROCESS_FILTER filter) { return m_filterRanges[filter].Multiplier; }
-
         bool IsAutoProcessingSupported() { return m_pUnderlyingVideoProcessEnum->IsAutoProcessingSupported(); }
 
         bool IsAlphaBlendProcessingSupported() { return m_fAlphaBlending; }
