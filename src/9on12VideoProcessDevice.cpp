@@ -259,7 +259,30 @@ namespace D3D9on12
     void VideoProcessDevice::SetFilter(D3D12_VIDEO_PROCESS_FILTER filter, D3D12_VIDEO_PROCESS_INPUT_STREAM_DESC *pStreamDesc, D3D12_VIDEO_PROCESS_INPUT_STREAM_ARGUMENTS1 *pStreamArguments, INT level)
     {
         pStreamDesc->FilterFlags |= (D3D12_VIDEO_PROCESS_FILTER_FLAGS)(1 << (UINT)filter);
-        pStreamArguments->FilterLevels[filter] = level;
+        
+        // Conversion between DXVA and D3D12 Multiplier/StepSize semantics.
+        // Need to re-normalize the DXVA range expressed as an absolute range with the fractional step to the D3D12 semantics as an expanded scaled range with unitary integer steps
+            // DXVA semantics
+            // https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dumddi/ns-d3dumddi-_dxvaddi_valuerange
+            // The range is expressed in absolute terms in Minimum, Maximum, Default. The allowed precision step between that range is defined in StepSize.
+            // For example, a hue filter might have an actual range of [–180.0 ... +180.0] with a step size of 0.25. 
+            // The device would report the following range and multiplier:
+            // Minimum: –180
+            // Maximum : +180
+            // StepSize : 0.25
+            // 
+            // D3D12 semantics
+            // https://docs.microsoft.com/zh-cn/windows-hardware/drivers/ddi/d3d12umddi/ns-d3d12umddi-d3d12ddi_video_process_filter_range_0020
+            // The multiplier enables the filter range to have a fractional step value. For example, a hue filter might have an actual range of [–180.0 ... +180.0] with a step size of 0.25. 
+            // The device would report the following range and multiplier:
+            // Minimum: –720
+            // Maximum : +720
+            // Multiplier : 0.25
+            // In this case, a filter value of 2 would be interpreted by the device as 0.50, which is 2 × 0.25.
+            // The device should use a multiplier that can be represented exactly as a base - 2 fraction.
+
+        FLOAT rangesMultiplier = m_pParentDevice->GetVideoDevice()->GetFilterRangeMultiplier(filter);
+        pStreamArguments->FilterLevels[filter] = static_cast<INT>(floor(level / rangesMultiplier));
     }
 
     _Use_decl_annotations_
