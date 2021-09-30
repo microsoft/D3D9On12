@@ -283,7 +283,6 @@ namespace D3D9on12
 
         FLOAT rangesMultiplier = m_pParentDevice->GetVideoDevice()->GetFilterRangeMultiplier(filter);
         pStreamArguments->FilterLevels[filter] = static_cast<INT>(floor(level / rangesMultiplier));
-        DebugBreak();
     }
 
     _Use_decl_annotations_

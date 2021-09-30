@@ -526,7 +526,6 @@ namespace D3D9on12
                     pFilterRanges[filter].Maximum = static_cast<INT>(floor(dx12Support.FilterRangeSupport[filter].Maximum * dx12Support.FilterRangeSupport[filter].Multiplier));
                     pFilterRanges[filter].Default = static_cast<INT>(floor(dx12Support.FilterRangeSupport[filter].Default * dx12Support.FilterRangeSupport[filter].Multiplier));
                     pFilterRanges[filter].Multiplier = dx12Support.FilterRangeSupport[filter].Multiplier;
-                    DebugBreak();
                 }
                 newMask >>= 1;
                 ++filter;
