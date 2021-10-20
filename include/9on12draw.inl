@@ -193,13 +193,13 @@ namespace D3D9on12
         {
             if (pData->PrimitiveType == D3DPT_TRIANGLEFAN)
             {
-                return pDevice->DrawTriangleFanIndexed(baseVertexOffset, static_cast<UINT>(UNKNOWN_VERTEX_COUNT), baseIndexOffset, pData->PrimitiveCount);
+                return pDevice->DrawTriangleFanIndexed(baseVertexOffset, pData->NumVertices, baseIndexOffset, pData->PrimitiveCount);
             }
 
             UINT instanceCount = 1;
             const UINT indexCount = CalcVertexCount(pData->PrimitiveType, pData->PrimitiveCount);
             bool skipDraw;
-            hr = DrawProlog(*pDevice, baseVertexOffset, static_cast<UINT>(UNKNOWN_VERTEX_COUNT), baseIndexOffset, indexCount, pData->PrimitiveType, instanceCount, skipDraw);
+            hr = DrawProlog(*pDevice, baseVertexOffset, pData->NumVertices, baseIndexOffset, indexCount, pData->PrimitiveType, instanceCount, skipDraw);
             CHECK_HR(hr);
             if (skipDraw)
             {

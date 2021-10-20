@@ -28,8 +28,9 @@ namespace D3D9on12
     {
         SubBuffer bufferOut = {};
         const UINT alignedSize = Align(size, m_alignmentRequired);
+        const ULONG64 totalSize = alignedSize + static_cast<ULONG64>(m_spaceUsed);
 
-        if (m_spaceUsed + alignedSize > m_size)
+        if (totalSize > static_cast<ULONG64>(m_size))
         {
             if (size > m_size)
             {
