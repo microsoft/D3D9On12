@@ -4,26 +4,38 @@
 
 namespace D3D9on12
 {
-    class Adapter
+    template <class AdapterType>
+    class AdapterFactory
     {
     public:
-        Adapter( _Inout_ D3DDDIARG_OPENADAPTER& OpenAdapter, LUID* pAdapterLUID, D3D9ON12_CREATE_DEVICE_ARGS* pArgs );
+        AdapterType *CreateAdapter(_Inout_ D3DDDIARG_OPENADAPTER &OpenAdapter, LUID *pAdapterLUID, D3D9ON12_CREATE_DEVICE_ARGS *pArgs);
+    };
 
+    class Adapter
+    {
+        friend class AdapterFactory<Adapter>;
+
+    public:
         ~Adapter();
 
         HRESULT Destroy();
 
-        static FORCEINLINE HANDLE GetHandleFromAdapter(Adapter* pAdapter){ return static_cast<HANDLE>(pAdapter); }
-        static FORCEINLINE Adapter* GetAdapterFromHandle(HANDLE hAdapter){ return static_cast<Adapter*>(hAdapter); }
+        static FORCEINLINE HANDLE GetHandleFromAdapter(Adapter *pAdapter) { return static_cast<HANDLE>(pAdapter); }
+        static FORCEINLINE Adapter *GetAdapterFromHandle(HANDLE hAdapter) { return static_cast<Adapter *>(hAdapter); }
 
-        CONST D3DDDI_ADAPTERCALLBACKS& GetRuntimeCallbacks() { return m_AdapterCallbacks; }
-        
-        void GetVideoCaps(_Inout_ CONST D3DDDIARG_GETCAPS* pGetCaps);
+        CONST D3DDDI_ADAPTERCALLBACKS &GetRuntimeCallbacks() { return m_AdapterCallbacks; }
+
+        void GetVideoCaps(_Inout_ CONST D3DDDIARG_GETCAPS *pGetCaps);
         void DeviceCreated(_In_ Device *pDevice) { m_pDevice = pDevice; }
-        void DeviceDestroyed(_In_ Device *pDevice) { UNREFERENCED_PARAMETER(pDevice);  assert(pDevice == m_pDevice);  m_pDevice = nullptr; }
+        void DeviceDestroyed(_In_ Device *pDevice)
+        {
+            UNREFERENCED_PARAMETER(pDevice);
+            assert(pDevice == m_pDevice);
+            m_pDevice = nullptr;
+        }
 
         static const UINT MAX_SURFACE_FORMATS = 48;
-        UINT GetFormatData(FORMATOP* pFormatOPs, UINT uiNumFormats = 0);
+        UINT GetFormatData(FORMATOP *pFormatOPs, UINT uiNumFormats = 0);
 
         ID3D12Device *GetDevice() { return m_pD3D12Device; }
         ID3D12CommandQueue *GetCommandQueue() { return m_pD3D12CommandQueue; }
@@ -32,9 +44,10 @@ namespace D3D9on12
         bool RequiresYUY2BlitWorkaround() const;
 
     protected:
+        Adapter(_Inout_ D3DDDIARG_OPENADAPTER &OpenAdapter);
         virtual void LogAdapterCreated( LUID *pluid, HRESULT hr );
 
-    private:
+    protected:
         void InitDebugLayer();
 
         CONST D3DDDI_ADAPTERCALLBACKS& m_AdapterCallbacks;
@@ -47,3 +60,5 @@ namespace D3D9on12
         uint64_t m_DriverVersion;
     };
 };
+
+#include "9on12AdapterFactory.inl"

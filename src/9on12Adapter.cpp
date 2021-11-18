@@ -169,7 +169,13 @@ namespace D3D9on12
             RETURN_E_INVALIDARG_AND_CHECK()
         }
 
-        Adapter* pNewAdapter = new Adapter(*pOpenAdapter, pLUID, pArgs);
+        if (RegistryConstants::g_cBreakOnLoad)
+        {
+            DebugBreak();
+        }
+
+        AdapterFactory<Adapter> adapterFactory;
+        Adapter* pNewAdapter = adapterFactory.CreateAdapter(*pOpenAdapter, pLUID, pArgs);
         if (pNewAdapter == nullptr)
         {
             return E_OUTOFMEMORY;
@@ -178,116 +184,10 @@ namespace D3D9on12
         D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }
 
-    Adapter::Adapter( _Inout_ D3DDDIARG_OPENADAPTER& OpenAdapter, LUID* pAdapterLUID, D3D9ON12_CREATE_DEVICE_ARGS* pArgs ) :
+    Adapter::Adapter( _Inout_ D3DDDIARG_OPENADAPTER& OpenAdapter ) :
         m_AdapterCallbacks( *OpenAdapter.pAdapterCallbacks ),
         m_pDevice( nullptr )
     {
-        if (RegistryConstants::g_cBreakOnLoad)
-        {
-            DebugBreak();
-        }
-
-        HRESULT hr = S_OK;
-        try
-        {
-            if (pAdapterLUID == nullptr) ThrowFailure(E_FAIL);
-            {
-                CComPtr<IUnknown> pAdapter;
-
-                {
-                    CComPtr<IDXCoreAdapterFactory> pFactory;
-                    if (SUCCEEDED(DXCoreCreateAdapterFactory(IID_PPV_ARGS(&pFactory))))
-                    {
-                        (void)pFactory->GetAdapterByLuid(*pAdapterLUID, IID_PPV_ARGS(&pAdapter));
-                    }
-
-                    if (pAdapter)
-                    {
-                        CComQIPtr<IDXCoreAdapter> pDXCoreAdapter = pAdapter;
-                        ThrowFailure(pDXCoreAdapter->GetProperty(DXCoreAdapterProperty::HardwareID, &m_HWIDs));
-                        ThrowFailure(pDXCoreAdapter->GetProperty(DXCoreAdapterProperty::DriverVersion, &m_DriverVersion));
-                    }
-                }
-                if (!pAdapter)
-                {
-                    CComPtr<IDXGIFactory4> pFactory;
-                    ThrowFailure(CreateDXGIFactory2(0, IID_PPV_ARGS(&pFactory)));
-                    ThrowFailure(pFactory->EnumAdapterByLuid(*pAdapterLUID, IID_PPV_ARGS(&pAdapter)));
-
-                    CComQIPtr<IDXGIAdapter> pDXGIAdapter = pAdapter;
-                    DXGI_ADAPTER_DESC AdapterDesc;
-                    ThrowFailure(pDXGIAdapter->GetDesc(&AdapterDesc));
-                    m_HWIDs = { AdapterDesc.VendorId, AdapterDesc.DeviceId, AdapterDesc.SubSysId, AdapterDesc.Revision };
-
-                    LARGE_INTEGER DriverVersion;
-                    ThrowFailure(pDXGIAdapter->CheckInterfaceSupport(__uuidof(IDXGIDevice), &DriverVersion));
-                    m_DriverVersion = DriverVersion.QuadPart;
-                }
-
-
-                if (pArgs && pArgs->pD3D12Device)
-                {
-                    ThrowFailure(pArgs->pD3D12Device->QueryInterface(&m_pD3D12Device));
-
-                    // Ensure the app provided D3D12 runtime matches up with the adapter the 9on12 device is being created ondapterLuid));
-                    ThrowFailure((memcmp(&m_pD3D12Device->GetAdapterLuid(), pAdapterLUID, sizeof(*pAdapterLUID)) == 0) ?
-                        S_OK : E_FAIL);
-                }
-                else
-                {
-                    if (RegistryConstants::g_cUseDebugLayer)
-                    {
-                        InitDebugLayer();
-                    }
-
-                    hr = D3D12CreateDevice(pAdapter, MinSupportedFeatureLevel, IID_PPV_ARGS(&m_pD3D12Device));
-                    ThrowFailure(hr);
-                }
-
-                D3D12_FEATURE_DATA_D3D12_OPTIONS3 d3d12Options3;
-                hr = m_pD3D12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &d3d12Options3, sizeof(d3d12Options3));
-                ThrowFailure(hr);
-
-                // TODO: 12281030 Once QC updates the BSP to have this on by default, just throw when
-                // CastingFullyTypedFormatSupported is not supported. Allows for major improvement in 
-                // simplicity/efficiency in 9on12's present path
-                m_bSupportsCastingTypelessResources = d3d12Options3.CastingFullyTypedFormatSupported;
-
-                if (pArgs && pArgs->NumQueues > 0)
-                {
-                    // If a queue is provided, they better have provided the device they created it with
-                    Check9on12(pArgs->pD3D12Device);
-                    Check9on12(pArgs->NumQueues == 1);
-
-
-                    ThrowFailure(pArgs->ppD3D12Queues[0]->QueryInterface(&m_pD3D12CommandQueue));
-                    ThrowFailure(m_pD3D12CommandQueue->GetDesc().Type != D3D12_COMMAND_LIST_TYPE_DIRECT ? E_FAIL : S_OK);
-                }
-                else
-                {
-                    D3D12_COMMAND_QUEUE_DESC commandQueueDesc;
-                    commandQueueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-                    commandQueueDesc.NodeMask = 0;
-                    commandQueueDesc.Priority = 0;
-                    commandQueueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-                    ThrowFailure(m_pD3D12Device->CreateCommandQueue(&commandQueueDesc, IID_PPV_ARGS(&m_pD3D12CommandQueue)));
-                }
-            }
-        }
-        catch (_com_error& hrEx)
-        {
-            hr = hrEx.Error();
-        }
-        catch (std::bad_alloc&)
-        {
-            hr = E_OUTOFMEMORY;
-        }
-        LogAdapterCreated( pAdapterLUID, hr );
-        ThrowFailure(hr);
-
-        OpenAdapter.hAdapter = Adapter::GetHandleFromAdapter( this );
-        memcpy( OpenAdapter.pAdapterFuncs, &g_9on12AdapterFunctions, sizeof( *OpenAdapter.pAdapterFuncs ) );// out: Driver function table
-        OpenAdapter.DriverVersion = min<UINT>( OpenAdapter.Version, D3D_UMD_INTERFACE_VERSION );            // out: D3D UMD interface version
     }
 
     Adapter::~Adapter()
