@@ -218,4 +218,6 @@ DEFINE_GUID(DXVADDI_VideoProcD3D9On12CustomDeinterlaceDevice, 0xe064b480, 0xa8bb
 #include <9on12VideoProcessDevice.h>
 
 //INLs
-#include <9on12Draw.inl>
+#include <9on12DrawPrologEpilog.inl>
+#include <9on12DrawTriangleFan.inl>
+#include <9on12DrawApis.inl>
