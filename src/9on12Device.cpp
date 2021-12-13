@@ -450,23 +450,19 @@ namespace D3D9on12
         m_systemMemoryAllocator( *this, 32 * 1024 * 1024, 4, /*bDeferDestroyDuringRealloc*/ true ),
         m_pVideoDevice( nullptr )
     {
-        memcpy( (void*)&m_Callbacks, CreateDeviceArgs.pCallbacks, sizeof( m_Callbacks ) );
-        memset( m_streamFrequency, 0, sizeof( m_streamFrequency ) );
+    }
 
-        HRESULT hr = Init( m_Adapter.GetDevice(), m_Adapter.GetCommandQueue() );
-
-        ThrowFailure( hr );
-
-        CreateDeviceArgs.hDevice = Device::GetHandleFromDevice( this );// in:  Runtime handle/out: Driver handle
+    void Device::UpdateCreateArgsForRuntime(_Inout_ D3DDDIARG_CREATEDEVICE& CreateDeviceArgs) 
+    {
+        CreateDeviceArgs.hDevice = Device::GetHandleFromDevice(this);// in:  Runtime handle/out: Driver handle
         CreateDeviceArgs.pAllocationList = NULL;
         CreateDeviceArgs.pPatchLocationList = NULL;
         CreateDeviceArgs.CommandBuffer = 0;
 
-        memcpy( CreateDeviceArgs.pDeviceFuncs, &g_9on12DeviceFuntions, sizeof( *CreateDeviceArgs.pDeviceFuncs ) );  // out: Driver function table
+        memcpy(CreateDeviceArgs.pDeviceFuncs, &g_9on12DeviceFuntions, sizeof(*CreateDeviceArgs.pDeviceFuncs));  // out: Driver function table
 
         // Marking these null informs the runtime that we don't want to participate in driver threading
-        if (RegistryConstants::g_cSingleThread)
-        {
+        if (RegistryConstants::g_cSingleThread) {
             CreateDeviceArgs.pDeviceFuncs->pfnLockAsync = nullptr;
             CreateDeviceArgs.pDeviceFuncs->pfnUnlockAsync = nullptr;
             CreateDeviceArgs.pDeviceFuncs->pfnRename = nullptr;

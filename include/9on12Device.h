@@ -10,13 +10,23 @@ namespace D3D9on12
         HANDLE m_runtimeHandle;
     };
 
+    template<class DeviceType>
+    class DeviceFactory
+    {
+    public:
+        DeviceType* CreateDevice(Adapter& adapter, _Inout_ D3DDDIARG_CREATEDEVICE& CreateDeviceArgs);
+    };
+
     class VideoDevice;
 
     class Device
     {
+        friend class DeviceFactory<Device>;
+    protected:
+        Device(Adapter& Adapter, _Inout_ D3DDDIARG_CREATEDEVICE& CreateDeviceArgs);
+    
     public:
-        Device( Adapter& Adapter, _Inout_ D3DDDIARG_CREATEDEVICE& CreateDeviceArgs );
-        ~Device();
+        virtual ~Device();
 
         static void ReportError(HRESULT /*hr*/) {};
 
@@ -79,9 +89,9 @@ namespace D3D9on12
         D3D12TranslationLayer::SharedResourceHelpers& GetSharedResourceHelper() { return *m_pSharedResourceHelpers; }
         D3D12TranslationLayer::BlitHelper& GetBlitHelper() { return GetContext().m_BlitHelper; }
 
-        HRESULT DrawTriangleFan(_In_ OffsetArg baseVertex, _In_ UINT primitiveCount);
-        HRESULT DrawWireframeTriangleFanWithEdgeFlags(_In_ OffsetArg baseVertex, _In_ UINT primitiveCount, _In_ UINT edgeFlags);
-        HRESULT DrawTriangleFanIndexed(_In_ OffsetArg baseVertex, _In_ UINT vertexCount, _In_ OffsetArg baseIndex, _In_ UINT primitiveCount);
+        virtual HRESULT DrawTriangleFan(_In_ OffsetArg baseVertex, _In_ UINT primitiveCount);
+        virtual HRESULT DrawWireframeTriangleFanWithEdgeFlags(_In_ OffsetArg baseVertex, _In_ UINT primitiveCount, _In_ UINT edgeFlags);
+        virtual HRESULT DrawTriangleFanIndexed(_In_ OffsetArg baseVertex, _In_ UINT vertexCount, _In_ OffsetArg baseIndex, _In_ UINT primitiveCount);
 
         FastUploadAllocator& GetSystemMemoryAllocator() { return m_systemMemoryAllocator; }
         DataLogger &GetDataLogger() { return m_dataLogger; }
@@ -106,6 +116,7 @@ namespace D3D9on12
 
     protected:
         virtual void LogCreateVideoDevice( HRESULT hr );
+        virtual void UpdateCreateArgsForRuntime(_Inout_ D3DDDIARG_CREATEDEVICE& CreateDeviceArgs);
 
     private:
 
@@ -156,3 +167,5 @@ namespace D3D9on12
         VideoDevice *m_pVideoDevice;
     };
 };
+
+#include "9on12DeviceFactory.inl"

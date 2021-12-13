@@ -128,7 +128,9 @@ namespace D3D9on12
             RETURN_E_INVALIDARG_AND_CHECK()
         }
 
-        Device* pNewDevice = new Device(*pNewAdapter, *pCreateDevice );
+        //Device* pNewDevice = new Device(*pNewAdapter, *pCreateDevice );
+        DeviceFactory<Device> deviceFactory;
+        Device* pNewDevice = deviceFactory.CreateDevice(*pNewAdapter, *pCreateDevice);
         if (pNewDevice == nullptr)
         {
             hr = E_OUTOFMEMORY;
