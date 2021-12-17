@@ -10,7 +10,7 @@ namespace D3D9on12
     class PipelineState
     {
     public:
-        PipelineState(Device& device);
+        PipelineState(Device& device, VertexStageFactory& vertexStageFactory);
 
         HRESULT Init(Device& device);
 
@@ -56,5 +56,21 @@ namespace D3D9on12
         };
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC m_PSODesc;
+    };
+
+    class PipelineStateFactory
+    {
+    public:
+        virtual PipelineState Create(Device& device) = 0;
+    };
+
+    class PipelineStateFactoryImpl : public PipelineStateFactory
+    {
+    public:
+        PipelineState Create(Device& device) override
+        {
+            VertexStageFactoryImpl vertexStageFactory;
+            return PipelineState(device, vertexStageFactory);
+        };
     };
 };

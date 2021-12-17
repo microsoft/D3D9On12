@@ -56,8 +56,24 @@ namespace D3D9on12
     struct SizedBuffer
     {
         SizedBuffer() : m_ptr(nullptr), m_size(0) {};
+        SizedBuffer(const SizedBuffer& other) = default;
+        SizedBuffer(SizedBuffer&& other) : m_ptr(other.m_ptr), m_size(other.m_size) 
+        { 
+            other.m_ptr = nullptr;
+            other.m_size = 0;
+        }
         SizedBuffer(byte* ptr, size_t size) : m_ptr(ptr), m_size(size) {};
         SizedBuffer(void* ptr, size_t size) : m_ptr((byte*)ptr), m_size(size) {};
+
+        SizedBuffer& operator=(SizedBuffer& other) = default;
+        SizedBuffer& operator=(SizedBuffer&& other) {
+            if (this == &other) return *this;
+
+            //don't delete m_ptr since we don't own it
+            m_ptr = std::exchange(other.m_ptr, nullptr);
+            m_size = std::exchange(other.m_size, 0);
+            return *this;
+        }
 
         byte* m_ptr;
         size_t m_size;
@@ -133,6 +149,8 @@ namespace D3D9on12
     {
     public:
         Shader(Device& device);
+        Shader(const Shader& other) = default;
+        Shader(Shader&& other);
         ~Shader();
 
         HRESULT Init(_In_ CONST byte& byteCode, _In_ size_t byteCodeLength);
@@ -190,6 +208,8 @@ namespace D3D9on12
     public:
 
         VertexShader(Device& parentDevice);
+        VertexShader(const VertexShader& other) = default;
+        VertexShader(VertexShader&& other);
         ~VertexShader();
 
         D3D12VertexShader& GetD3D12Shader(const ShaderConv::RasterStates &rasterStates, InputLayout& inputLayout);
@@ -242,6 +262,7 @@ namespace D3D9on12
     {
     public:
         GeometryShader(Device& parentDevice);
+        GeometryShader(GeometryShader&& other);
         ~GeometryShader();
 
         D3D12GeometryShader& GetD3D12Shader(D3D12VertexShader& currentVS, const ShaderConv::RasterStates& rasterStates);

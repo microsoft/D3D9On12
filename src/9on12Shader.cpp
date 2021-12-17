@@ -107,12 +107,33 @@ namespace D3D9on12
     {
     }
 
+    Shader::Shader(Shader&& other) :
+        PipelineStateCacheKeyComponent(std::forward<PipelineStateCacheKeyComponent>(other)),
+        m_parentDevice(other.m_parentDevice),
+        m_DXBCBuilder(other.m_DXBCBuilder),
+        m_legacyCodeHash(other.m_legacyCodeHash),
+        m_d3d9ByteCode(std::move(other.m_d3d9ByteCode))
+    {
+        
+    }
+
     VertexShader::VertexShader(Device& parentDevice) :
-        Shader(parentDevice) {};
+        Shader(parentDevice) {}
+
+    VertexShader::VertexShader(VertexShader&& other) : 
+        Shader(std::forward<Shader>(other)),
+        m_derivedShaders(std::move(other.m_derivedShaders))
+    {
+    };
 
     PixelShader::PixelShader(Device& parentDevice) : Shader(parentDevice) {}
 
     GeometryShader::GeometryShader(Device& parentDevice) : Shader(parentDevice) {};
+    GeometryShader::GeometryShader(GeometryShader&& other) : 
+        Shader(std::forward<Shader>(other)),
+        m_derivedShaders(std::move(other.m_derivedShaders))
+    {
+    };
 
     Shader::~Shader()
     {

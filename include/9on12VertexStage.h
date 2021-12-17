@@ -11,6 +11,7 @@ namespace D3D9on12
     class VertexStage
     {
     public:
+        VertexStage(VertexShader&& tlShaderCache, GeometryShader&& geometryShaderCache, PipelineStateDirtyFlags& pipelineStateDirtyFlags, RasterStatesWrapper& rasterStates);
         VertexStage(Device& device, PipelineStateDirtyFlags& pipelineStateDirtyFlags, RasterStatesWrapper& rasterStates);
 
         void SetVertexShader(VertexShader* pShader);
@@ -53,5 +54,20 @@ namespace D3D9on12
 
         PipelineStateDirtyFlags& m_dirtyFlags;
         RasterStatesWrapper& m_rasterStates;
+    };
+
+    class VertexStageFactory 
+    {
+    public:
+        virtual VertexStage Create(Device& device, PipelineStateDirtyFlags& pipelineStateDirtyFlags, RasterStatesWrapper& rasterStates) = 0;
+    };
+
+    class VertexStageFactoryImpl : public VertexStageFactory
+    {
+    public:
+        VertexStage Create(Device& device, PipelineStateDirtyFlags& pipelineStateDirtyFlags, RasterStatesWrapper& rasterStates) override
+        {
+            return VertexStage(VertexShader(device), GeometryShader(device), pipelineStateDirtyFlags, rasterStates);
+        }
     };
 };

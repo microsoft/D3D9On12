@@ -84,6 +84,20 @@ namespace D3D9on12
         D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }
 
+    VertexStage::VertexStage(VertexShader&& tlShaderCache, GeometryShader&& geometryShaderCache, PipelineStateDirtyFlags& pipelineStateDirtyFlags, RasterStatesWrapper& rasterStates) :
+        m_dirtyFlags(pipelineStateDirtyFlags),
+        m_VSExtension(pipelineStateDirtyFlags),
+        m_rasterStates(rasterStates),
+        m_pCurrentVS(nullptr),
+        m_pCurrentD3D12VS(nullptr),
+        m_pCurrentD3D12GS(nullptr),
+        m_tlShaderCache(std::move(tlShaderCache)),
+        m_scissorRect{},
+        m_currentViewPort{},
+        m_geometryShaderCache(std::move(geometryShaderCache))
+    {
+    }
+
     VertexStage::VertexStage(Device& device, PipelineStateDirtyFlags& pipelineStateDirtyFlags, RasterStatesWrapper& rasterStates) :
         m_dirtyFlags(pipelineStateDirtyFlags),
         m_VSExtension(pipelineStateDirtyFlags),
