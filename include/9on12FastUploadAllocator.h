@@ -45,4 +45,19 @@ namespace D3D9on12
 
         unique_unbind_resourceptr m_pDeferredDestroyedResource;
     };
+
+    class FastUploadAllocatorFactory
+    {
+    public:
+        virtual FastUploadAllocator Create(Device& device, UINT size, UINT alignment, bool bDeferDestroyDuringRealloc = false) = 0;
+    };
+
+    class FastUploadAllocatorFactoryImpl : public FastUploadAllocatorFactory
+    {
+    public:
+        FastUploadAllocator Create(Device& device, UINT size, UINT alignment, bool bDeferDestroyDuringRealloc = false) 
+        {
+            return FastUploadAllocator(device, size, alignment, bDeferDestroyDuringRealloc);
+        }
+    };
 };

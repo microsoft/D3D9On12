@@ -191,6 +191,7 @@ namespace D3D9on12
             m_pixelShaderData(device),
             m_nullCB(0, device)
             {}
+        ConstantsManager(const ConstantsManager& other) = default;
 
         void Destroy();
 
@@ -219,4 +220,15 @@ namespace D3D9on12
         ConstantBufferBinding m_nullCB;
     };
 
+    class ConstantsManagerFactory 
+    {
+    public:
+        virtual ConstantsManager Create(Device& device) = 0;
+    };
+
+    class ConstantsManagerFactoryImpl : public ConstantsManagerFactory
+    {
+    public:
+        ConstantsManager Create(Device& device) override { return ConstantsManager(device); }
+    };
 };

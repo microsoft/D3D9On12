@@ -12,7 +12,6 @@ namespace D3D9on12
     {
     public:
         VertexStage(VertexShader&& tlShaderCache, GeometryShader&& geometryShaderCache, PipelineStateDirtyFlags& pipelineStateDirtyFlags, RasterStatesWrapper& rasterStates);
-        VertexStage(Device& device, PipelineStateDirtyFlags& pipelineStateDirtyFlags, RasterStatesWrapper& rasterStates);
 
         void SetVertexShader(VertexShader* pShader);
 

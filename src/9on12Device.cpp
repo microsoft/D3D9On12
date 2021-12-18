@@ -438,18 +438,20 @@ namespace D3D9on12
         return hr;
     }
 
-    Device::Device( Adapter& Adapter, _Inout_ D3DDDIARG_CREATEDEVICE& CreateDeviceArgs ) :
-        m_Adapter( Adapter ),
-        m_runtimeHandle( CreateDeviceArgs.hDevice ),
-        m_pUMDPresentArgs( nullptr ),
-        m_pipelineStateCache( *this ),
-        m_pipelineState( *this ),
-        m_NodeMask( 0 ),
-        m_d3d9APIVersion( CreateDeviceArgs.Version ),
-        m_constantsManager( *this ),
-        m_systemMemoryAllocator( *this, 32 * 1024 * 1024, 4, /*bDeferDestroyDuringRealloc*/ true ),
-        m_pVideoDevice( nullptr )
+    Device::Device(Adapter& Adapter, D3DDDIARG_CREATEDEVICE& CreateDeviceArgs, ConstantsManagerFactory& constantsManagerFactory, FastUploadAllocatorFactory& fastUploadAllocatorFactory, PipelineStateFactory& pipelineStateFactory, PipelineStateCacheFactory& pipelineStateCacheFactory) :
+        m_Adapter(Adapter),
+        m_runtimeHandle(CreateDeviceArgs.hDevice),
+        m_pUMDPresentArgs(nullptr),
+        m_pipelineStateCache(pipelineStateCacheFactory.Create(*this)),
+        m_pipelineState(pipelineStateFactory.Create(*this)),
+        m_NodeMask(0),
+        m_d3d9APIVersion(CreateDeviceArgs.Version),
+        m_constantsManager(constantsManagerFactory.Create(*this)),
+        m_systemMemoryAllocator(fastUploadAllocatorFactory.Create(*this, 32 * 1024 * 1024, 4, /*bDeferDestroyDuringRealloc*/ true)),
+        m_pVideoDevice(nullptr)
     {
+        memcpy((void*)&m_Callbacks, CreateDeviceArgs.pCallbacks, sizeof(m_Callbacks));
+        memset(m_streamFrequency, 0, sizeof(m_streamFrequency));
     }
 
     void Device::UpdateCreateArgsForRuntime(_Inout_ D3DDDIARG_CREATEDEVICE& CreateDeviceArgs) 

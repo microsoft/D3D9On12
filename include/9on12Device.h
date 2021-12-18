@@ -23,7 +23,11 @@ namespace D3D9on12
     {
         friend class DeviceFactory<Device>;
     protected:
-        Device(Adapter& Adapter, _Inout_ D3DDDIARG_CREATEDEVICE& CreateDeviceArgs);
+        Device(Adapter& Adapter, _Inout_ D3DDDIARG_CREATEDEVICE& CreateDeviceArgs,
+            ConstantsManagerFactory& constantsManagerFactory,
+            FastUploadAllocatorFactory& fastUploadAllocatorFactory,
+            PipelineStateFactory& pipelineStateFactory,
+            PipelineStateCacheFactory& pipelineStateCacheFactory);
     
     public:
         virtual ~Device();

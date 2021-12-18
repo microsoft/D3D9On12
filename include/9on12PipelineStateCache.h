@@ -179,4 +179,15 @@ namespace D3D9on12
         PipelineStateCacheImpl m_cache;
     };
 
+    class PipelineStateCacheFactory 
+    {
+    public:
+        virtual PipelineStateCache Create(Device& device) = 0;
+    };
+
+    class PipelineStateCacheFactoryImpl : public PipelineStateCacheFactory
+    {
+    public:
+        PipelineStateCache Create(Device& device) override { return PipelineStateCache(device); }
+    };
 };

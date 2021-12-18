@@ -18,12 +18,13 @@ set_target_properties(gmock_main PROPERTIES FOLDER "Dependencies")
 
 set(TEST_BINARY ${PROJECT_NAME}_tst)
 
-file(GLOB_RECURSE TEST_SOURCES LIST_DIRECTORIES false *.h *.cpp)
+file(GLOB_RECURSE TEST_SOURCES LIST_DIRECTORIES false *.cpp)
+file(GLOB INC ./include/*.h ./include/*.hpp *.h *.hpp)
 file(GLOB MOCKS ./Mocks/*.h)
 
 set(SOURCES ${TEST_SOURCES})
 
-add_executable(${TEST_BINARY} ${TEST_SOURCES})
+add_executable(${TEST_BINARY} ${TEST_SOURCES} ${INC} ${MOCKS})
 
 add_test(NAME ${TEST_BINARY} COMMAND ${TEST_BINARY})
 
@@ -34,6 +35,7 @@ target_include_directories(${TEST_BINARY}
     PRIVATE ../external
     PRIVATE ./Mocks
     PRIVATE ./
+    PRIVATE ./include
 )
 
 source_group(Mocks FILES ${MOCKS})

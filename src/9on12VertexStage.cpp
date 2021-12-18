@@ -98,19 +98,6 @@ namespace D3D9on12
     {
     }
 
-    VertexStage::VertexStage(Device& device, PipelineStateDirtyFlags& pipelineStateDirtyFlags, RasterStatesWrapper& rasterStates) :
-        m_dirtyFlags(pipelineStateDirtyFlags),
-        m_VSExtension(pipelineStateDirtyFlags),
-        m_rasterStates(rasterStates),
-        m_pCurrentVS(nullptr),
-        m_pCurrentD3D12VS(nullptr),
-        m_pCurrentD3D12GS(nullptr),
-        m_tlShaderCache(device),
-        m_scissorRect{},
-        m_currentViewPort{},
-        m_geometryShaderCache(device)
-    {}
-
     void VertexStage::SetScissorRect(Device& device, _In_ RECT scissorRect)
     {
         m_scissorRect = scissorRect;
