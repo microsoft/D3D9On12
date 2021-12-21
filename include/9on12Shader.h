@@ -132,10 +132,9 @@ namespace D3D9on12
     class Shader : public PipelineStateCacheKeyComponent
     {
     public:
+        Shader(Device& device, _In_ CONST byte& byteCode, _In_ size_t byteCodeLength, WeakHash hash);
         Shader(Device& device);
         ~Shader();
-
-        HRESULT Init(_In_ CONST byte& byteCode, _In_ size_t byteCodeLength);
 
         static FORCEINLINE HANDLE GetHandleFromShader(Shader* pShader){ return static_cast<HANDLE>(pShader); }
         static FORCEINLINE Shader* GetShaderFromHandle(HANDLE hShader){ return static_cast<Shader*>(hShader); }
@@ -153,7 +152,7 @@ namespace D3D9on12
 
         SizedBuffer m_d3d9ByteCode;
 
-        WeakHash m_legacyCodeHash;
+        const WeakHash m_legacyCodeHash;
 
         CDXBCBuilder m_DXBCBuilder;
 
@@ -189,6 +188,7 @@ namespace D3D9on12
     {
     public:
 
+        VertexShader(Device& parentDevice, _In_ CONST byte& byteCode, _In_ size_t byteCodeLength, WeakHash hash);
         VertexShader(Device& parentDevice);
         ~VertexShader();
 
@@ -241,6 +241,7 @@ namespace D3D9on12
     class GeometryShader : public Shader
     {
     public:
+        GeometryShader(Device& parentDevice, _In_ CONST byte& byteCode, _In_ size_t byteCodeLength, WeakHash hash);
         GeometryShader(Device& parentDevice);
         ~GeometryShader();
 
@@ -286,7 +287,7 @@ namespace D3D9on12
     class PixelShader : public Shader
     {
     public:
-        PixelShader(Device& parentDevice);
+        PixelShader(Device& parentDevice, _In_ CONST byte& byteCode, _In_ size_t byteCodeLength, WeakHash hash);
         ~PixelShader();
 
         D3D12PixelShader& GetD3D12Shader(const ShaderConv::RasterStates &rasterStates, ShaderConv::VSOutputDecls& vsOutputDecls, D3D12Shader& inputShader);
