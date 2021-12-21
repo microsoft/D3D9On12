@@ -16,8 +16,7 @@ namespace D3D9on12
 
         const byte* pShaderByteCode = (RegistryConstants::g_cDebugRedPixelShader) ? g_redOutputPS : (byte*)pByteCode;
         const size_t byteCodeSize = (RegistryConstants::g_cDebugRedPixelShader) ? sizeof(g_redOutputPS) : pCreatePixelShader->CodeSize;
-        WeakHash hash = HashData(pShaderByteCode, byteCodeSize);
-        PixelShader* pShader = new PixelShader(*pDevice, *pShaderByteCode, byteCodeSize, hash);
+        PixelShader* pShader = pDevice->m_PSDedupe.GetOrCreate(*pDevice, pShaderByteCode, byteCodeSize);
 
         pCreatePixelShader->ShaderHandle = Shader::GetHandleFromShader(pShader);
 
@@ -34,7 +33,7 @@ namespace D3D9on12
             RETURN_E_INVALIDARG_AND_CHECK();
         }
 
-        delete(pShader);
+        pDevice->m_PSDedupe.Release(static_cast<PixelShader*>(pShader));
 
         D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }
@@ -49,8 +48,7 @@ namespace D3D9on12
         }
         const byte* pShaderByteCode = (RegistryConstants::g_cDebugPassThroughVertexShader) ? g_passThroughVS : (byte*)pByteCode;
         const size_t byteCodeSize = (RegistryConstants::g_cDebugPassThroughVertexShader) ? sizeof(g_passThroughVS) : pCreateVertexShader->Size;
-        WeakHash hash = HashData(pShaderByteCode, byteCodeSize);
-        VertexShader* pShader = new VertexShader(*pDevice, *pShaderByteCode, byteCodeSize, hash);
+        VertexShader* pShader = pDevice->m_VSDedupe.GetOrCreate(*pDevice, pShaderByteCode, byteCodeSize);
 
         pCreateVertexShader->ShaderHandle = Shader::GetHandleFromShader(pShader);
 
@@ -67,7 +65,7 @@ namespace D3D9on12
             RETURN_E_INVALIDARG_AND_CHECK();
         }
 
-        delete(pShader);
+        pDevice->m_VSDedupe.Release(pShader);
 
         D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }

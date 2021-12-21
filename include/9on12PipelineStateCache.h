@@ -179,4 +179,56 @@ namespace D3D9on12
         PipelineStateCacheImpl m_cache;
     };
 
+    struct ShaderKey
+    {
+        const byte *pBytecode;
+        size_t size;
+        WeakHash hash;
+
+        struct Hasher
+        {
+            size_t operator()(ShaderKey const& key) const { return key.hash.m_data; }
+        };
+        bool operator==(ShaderKey const& o) const
+        {
+            assert(hash == o.hash);
+            return size == o.size &&
+                (pBytecode == o.pBytecode ||
+                    memcmp(pBytecode, o.pBytecode, size) == 0);
+        }
+    };
+
+    template <typename TShader>
+    struct ShaderDedupe
+    {
+        std::unordered_map<ShaderKey, std::unique_ptr<TShader>, ShaderKey::Hasher> map;
+        TShader *GetOrCreate(Device& device, const byte *pBytecode, size_t size)
+        {
+            ShaderKey searchKey{ pBytecode, size, HashData(pBytecode, size) };
+            auto iter = map.find(searchKey);
+            if (iter != map.end())
+            {
+                iter->second->AddRef();
+                return iter->second.get();
+            }
+
+            std::unique_ptr<TShader> shader(new TShader(device, *pBytecode, size, searchKey.hash));
+            ShaderKey insertKey{ shader->GetLegacyByteCode().m_ptr, shader->GetLegacyByteCode().m_size, searchKey.hash };
+            auto ret = map.emplace(insertKey, std::move(shader));
+            assert(ret.second);
+            return ret.first->second.get();
+        }
+
+        void Release(TShader *shader)
+        {
+            UINT refCount = shader->Release();
+            if (refCount == 0)
+            {
+                ShaderKey searchKey{ shader->GetLegacyByteCode().m_ptr, shader->GetLegacyByteCode().m_size, shader->GetHashForLegacyByteCode() };
+                [[maybe_unused]] size_t num_erased = map.erase(searchKey);
+                assert(num_erased == 1);
+            }
+        }
+    };
+
 };

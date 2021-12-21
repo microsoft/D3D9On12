@@ -136,10 +136,14 @@ namespace D3D9on12
         Shader(Device& device);
         ~Shader();
 
+        void AddRef() { ++m_refCount; }
+        UINT Release() { return --m_refCount; }
+
         static FORCEINLINE HANDLE GetHandleFromShader(Shader* pShader){ return static_cast<HANDLE>(pShader); }
         static FORCEINLINE Shader* GetShaderFromHandle(HANDLE hShader){ return static_cast<Shader*>(hShader); }
 
         WeakHash GetHashForLegacyByteCode() { return m_legacyCodeHash; }
+        const SizedBuffer& GetLegacyByteCode() { return m_d3d9ByteCode; }
 
         HRESULT ShaderConversionPrologue();
     protected:
@@ -150,6 +154,7 @@ namespace D3D9on12
         static HRESULT DisassembleShader(CComPtr<ID3DBlob> &pBlob, const D3D12_SHADER_BYTECODE &shaderByteCode);
         static HRESULT ValidateShader(const D3D12_SHADER_BYTECODE &shaderByteCode);
 
+        UINT m_refCount = 1;
         SizedBuffer m_d3d9ByteCode;
 
         const WeakHash m_legacyCodeHash;
