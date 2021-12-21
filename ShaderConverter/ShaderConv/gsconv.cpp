@@ -273,8 +273,6 @@ HRESULT
 CGSContext::WriteDeclarations()
 {
     const bool isPointSizeEnable   = m_pShaderDesc->PointSizeEnable();
-    const bool isPointSpriteEnable = m_pShaderDesc->PointSpriteEnable();
-    const UINT userClipPlanes      = m_pShaderDesc->GetUserClipPlanes();
 
     D3D10_SB_PRIMITIVE_TOPOLOGY topology;
     D3D10_SB_PRIMITIVE primitive;
