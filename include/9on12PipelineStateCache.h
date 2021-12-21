@@ -191,7 +191,6 @@ namespace D3D9on12
         };
         bool operator==(ShaderKey const& o) const
         {
-            assert(hash == o.hash);
             return size == o.size &&
                 (pBytecode == o.pBytecode ||
                     memcmp(pBytecode, o.pBytecode, size) == 0);
