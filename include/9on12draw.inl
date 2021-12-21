@@ -162,8 +162,6 @@ namespace D3D9on12
             Check9on12(false);
             return E_NOTIMPL;
         }
-
-        const size_t bufferSize = dwIndicesSize * pData->PrimitiveCount * pData->NumVertices;
         
         UINT const stream0Stride = pDevice->GetPipelineState().GetInputAssembly().GetStream0Stride();
         Check9on12(stream0Stride > 0);

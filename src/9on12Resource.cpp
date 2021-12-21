@@ -253,7 +253,6 @@ namespace D3D9on12
         }
 
         Check9on12(pDepthFill->SubResourceIndex == 0);
-        const UINT subresource = pResource->ConvertAppSubresourceToDX12Subresource(pDepthFill->SubResourceIndex);
         HRESULT hr =pResource->ClearDepthStencil(D3DCLEAR_ZBUFFER, &pDepthFill->DstRect, 1, (float)pDepthFill->Depth, 0);
         CHECK_HR(hr);
 
