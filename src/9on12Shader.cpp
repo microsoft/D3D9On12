@@ -188,7 +188,7 @@ namespace D3D9on12
     {
         HRESULT hr = S_OK;
 
-        DerivedPixelShaderKey key(rasterStates, vsOutputDecls, GetHashForLegacyByteCode());
+        DerivedPixelShaderKey key(rasterStates, vsOutputDecls);
 
         auto derivedShader = m_derivedShaders.find(key);
 
@@ -363,7 +363,7 @@ namespace D3D9on12
     {
         HRESULT hr = S_OK;
 
-        DerivedVertexShaderKey key(rasterStates, inputLayout, GetHashForLegacyByteCode(), m_parentDevice.GetPointerToStreamFrequencies());
+        DerivedVertexShaderKey key(rasterStates, inputLayout, m_parentDevice.GetPointerToStreamFrequencies());
 
         auto derivedShader = m_derivedShaders.find(key);
 
@@ -421,8 +421,7 @@ namespace D3D9on12
     {
         HRESULT hr = S_OK;
 
-        // note: we always give a constant hash for the legacy shader code because TL shaders don't have a VS.
-        DerivedVertexShaderKey key(rasterStates, inputLayout, WeakHash(0), m_parentDevice.GetPointerToStreamFrequencies());
+        DerivedVertexShaderKey key(rasterStates, inputLayout, m_parentDevice.GetPointerToStreamFrequencies());
 
         auto derivedShader = m_derivedShaders.find(key);
 

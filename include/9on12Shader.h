@@ -209,22 +209,19 @@ namespace D3D9on12
         struct DerivedVertexShaderKey : public DerivedShaderKey
         {
             // Hash in the constructor so that his key can be used several times efficiently
-            DerivedVertexShaderKey(const ShaderConv::RasterStates& rasterStates, InputLayout& inputLayout, WeakHash legacyByteCodeHash, _In_reads_(MAX_VERTEX_STREAMS) UINT* streamFrequencies) : DerivedShaderKey(rasterStates)
+            DerivedVertexShaderKey(const ShaderConv::RasterStates& rasterStates, InputLayout& inputLayout, _In_reads_(MAX_VERTEX_STREAMS) UINT* streamFrequencies) : DerivedShaderKey(rasterStates)
             {
                 //memcpy because assignment can add alignment which can throw off hashing
                 memcpy(&m_inputLayoutHash, &inputLayout.GetHash(), sizeof(m_inputLayoutHash));
-                memcpy(&m_legacyByteCodeHash, &legacyByteCodeHash, sizeof(m_legacyByteCodeHash));
                 memcpy(m_streamFrequencies, streamFrequencies, sizeof(m_streamFrequencies));
 
                 WeakHash hash = HashData(&m_rasterStates, sizeof(m_rasterStates), m_inputLayoutHash);//Add the hash from the IL
-                hash = HashData(&m_legacyByteCodeHash, sizeof(m_legacyByteCodeHash), hash);
                 hash = HashData(streamFrequencies, sizeof(streamFrequencies), hash);
                 m_hash = size_t(hash.m_data);
             };
 
             //Needs to be a deep copy as it's essentially a snapshot of the state at the time
             WeakHash m_inputLayoutHash;
-            WeakHash m_legacyByteCodeHash;
             UINT     m_streamFrequencies[MAX_VERTEX_STREAMS];
 
             struct Comparator
@@ -233,8 +230,7 @@ namespace D3D9on12
                 {
                     return memcmp(&a.m_rasterStates, &b.m_rasterStates, sizeof(a.m_rasterStates)) == 0 &&
                         memcmp(&a.m_streamFrequencies, &b.m_streamFrequencies, sizeof(a.m_streamFrequencies)) == 0 &&
-                        a.m_inputLayoutHash == b.m_inputLayoutHash &&
-                        a.m_legacyByteCodeHash == b.m_legacyByteCodeHash;
+                        a.m_inputLayoutHash == b.m_inputLayoutHash;
                 }
             };
         };
@@ -302,20 +298,18 @@ namespace D3D9on12
         struct DerivedPixelShaderKey : public DerivedShaderKey
         {
             // Hash in the constructor so that his key can be used several times efficiently
-            DerivedPixelShaderKey(const ShaderConv::RasterStates& rasterStates, ShaderConv::VSOutputDecls& vsOutDecls, WeakHash legacyByteCodeHash) : DerivedShaderKey(rasterStates)
+            DerivedPixelShaderKey(const ShaderConv::RasterStates& rasterStates, ShaderConv::VSOutputDecls& vsOutDecls) : DerivedShaderKey(rasterStates)
             {
                 //memcpy because assignment can add alignment which can throw off hashing
                 memcpy(&m_vsOutDecls, &vsOutDecls, sizeof(m_vsOutDecls));
-                memcpy(&m_legacyByteCodeHash, &legacyByteCodeHash, sizeof(m_legacyByteCodeHash));
-
-                WeakHash hash = HashData(&m_rasterStates, sizeof(m_rasterStates), m_legacyByteCodeHash);
+                
+                WeakHash hash = HashData(&m_rasterStates, sizeof(m_rasterStates));
                 hash = HashData(&m_vsOutDecls[0], m_vsOutDecls.GetSize() * sizeof(m_vsOutDecls[0]), hash);
                 m_hash = size_t(hash.m_data);
             };
 
             //Needs to be a deep copy as it's essentially a snapshot of the state at the time
             ShaderConv::VSOutputDecls m_vsOutDecls;
-            WeakHash m_legacyByteCodeHash;
 
             struct Comparator
             {
@@ -328,8 +322,7 @@ namespace D3D9on12
                         if (memcmp(&a.m_vsOutDecls[i], &b.m_vsOutDecls[i], sizeof(a.m_vsOutDecls[i])) != 0) { return false; }
                     }
 
-                    return memcmp(&a.m_rasterStates, &b.m_rasterStates, sizeof(a.m_rasterStates)) == 0 &&
-                        a.m_legacyByteCodeHash == b.m_legacyByteCodeHash;
+                    return memcmp(&a.m_rasterStates, &b.m_rasterStates, sizeof(a.m_rasterStates)) == 0;
                 }
             };
         };
