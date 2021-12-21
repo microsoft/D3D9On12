@@ -46,6 +46,9 @@ At the time of publishing, the D3D9On12 and D3D12TranslationLayer require **insi
 
 D3D9On12 requires C++17, and only supports building with MSVC at the moment.
 
+### Troubleshoot building
+A somewhat common issue when trying to build the mapping layers is that there are multiple Windows SDKs installed, but only a subset of them has a corresponding WDK also installed. You can specify which version of the SDK to use when generating the solution by adding the following to your cmake command: `-DCMAKE_SYSTEM_VERSION=<SDK_VERSION>`.
+
 ### Usage
 Note that in order to use your custom version of D3D9on12 you will also need to copy `WinPixEventRuntime.dll` (will automatically be placed in D3D9on12's build output) and `dxbcsigner.dll` along with it.
 
