@@ -104,6 +104,9 @@ namespace D3D9on12
 
         ShaderConv::ShaderConverterAPI m_ShaderConvAPI;
 
+        ShaderDedupe<VertexShader> m_VSDedupe;
+        ShaderDedupe<PixelShader> m_PSDedupe;
+
     protected:
         virtual void LogCreateVideoDevice( HRESULT hr );
 

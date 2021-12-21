@@ -13,28 +13,14 @@ namespace D3D9on12
         {
             RETURN_E_INVALIDARG_AND_CHECK();
         }
-        HRESULT hr = S_OK;
-        PixelShader* pShader = new PixelShader(*pDevice);
 
-        if (pShader != nullptr)
-        {
-            const byte* pShaderByteCode = (RegistryConstants::g_cDebugRedPixelShader) ? g_redOutputPS : (byte*)pByteCode;
-            const size_t byteCodeSize = (RegistryConstants::g_cDebugRedPixelShader) ? sizeof(g_redOutputPS) : pCreatePixelShader->CodeSize;
+        const byte* pShaderByteCode = (RegistryConstants::g_cDebugRedPixelShader) ? g_redOutputPS : (byte*)pByteCode;
+        const size_t byteCodeSize = (RegistryConstants::g_cDebugRedPixelShader) ? sizeof(g_redOutputPS) : pCreatePixelShader->CodeSize;
+        PixelShader* pShader = pDevice->m_PSDedupe.GetOrCreate(*pDevice, pShaderByteCode, byteCodeSize);
 
-            hr = pShader->Init(*pShaderByteCode, byteCodeSize);
-            CHECK_HR(hr);
+        pCreatePixelShader->ShaderHandle = Shader::GetHandleFromShader(pShader);
 
-            if (SUCCEEDED(hr))
-            {
-                pCreatePixelShader->ShaderHandle = Shader::GetHandleFromShader(pShader);
-            }
-        }
-        else
-        {
-            hr = E_OUTOFMEMORY;
-        }
-
-        D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(hr);
+        D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }
 
     _Check_return_ HRESULT APIENTRY DeletePixelShader(_In_ HANDLE hDevice, _In_ HANDLE hShader)
@@ -47,7 +33,7 @@ namespace D3D9on12
             RETURN_E_INVALIDARG_AND_CHECK();
         }
 
-        delete(pShader);
+        pDevice->m_PSDedupe.Release(static_cast<PixelShader*>(pShader));
 
         D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }
@@ -60,28 +46,13 @@ namespace D3D9on12
         {
             RETURN_E_INVALIDARG_AND_CHECK();
         }
-        HRESULT hr = S_OK;
-        VertexShader* pShader = new VertexShader(*pDevice);
+        const byte* pShaderByteCode = (RegistryConstants::g_cDebugPassThroughVertexShader) ? g_passThroughVS : (byte*)pByteCode;
+        const size_t byteCodeSize = (RegistryConstants::g_cDebugPassThroughVertexShader) ? sizeof(g_passThroughVS) : pCreateVertexShader->Size;
+        VertexShader* pShader = pDevice->m_VSDedupe.GetOrCreate(*pDevice, pShaderByteCode, byteCodeSize);
 
-        if (pShader != nullptr)
-        {
-            const byte* pShaderByteCode = (RegistryConstants::g_cDebugPassThroughVertexShader) ? g_passThroughVS : (byte*)pByteCode;
-            const size_t byteCodeSize = (RegistryConstants::g_cDebugPassThroughVertexShader) ? sizeof(g_passThroughVS) : pCreateVertexShader->Size;
+        pCreateVertexShader->ShaderHandle = Shader::GetHandleFromShader(pShader);
 
-            hr = pShader->Init(*pShaderByteCode, byteCodeSize);
-            CHECK_HR(hr);
-
-            if (SUCCEEDED(hr))
-            {
-                pCreateVertexShader->ShaderHandle = Shader::GetHandleFromShader(pShader);
-            }
-        }
-        else
-        {
-            hr = E_OUTOFMEMORY;
-        }
-
-        D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(hr);
+        D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }
 
     _Check_return_ HRESULT APIENTRY DeleteVertexShaderFunc(_In_ HANDLE hDevice, _In_ HANDLE hShader)
@@ -94,7 +65,7 @@ namespace D3D9on12
             RETURN_E_INVALIDARG_AND_CHECK();
         }
 
-        delete(pShader);
+        pDevice->m_VSDedupe.Release(pShader);
 
         D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }
@@ -107,31 +78,32 @@ namespace D3D9on12
     {
     }
 
+    Shader::Shader(Device& device, _In_ CONST byte& byteCode, _In_ size_t byteCodeLength, WeakHash hash) :
+        PipelineStateCacheKeyComponent(device.GetPipelineStateCache().GetCache()),
+        m_parentDevice(device),
+        m_DXBCBuilder(false),
+        m_legacyCodeHash(hash)
+    {
+        m_d3d9ByteCode = SizedBuffer(new byte[byteCodeLength], byteCodeLength);
+        memcpy(m_d3d9ByteCode.m_ptr, &byteCode, byteCodeLength);
+    }
+
+    VertexShader::VertexShader(Device& parentDevice, _In_ CONST byte& byteCode, _In_ size_t byteCodeLength, WeakHash hash) :
+        Shader(parentDevice, byteCode, byteCodeLength, hash) {}
     VertexShader::VertexShader(Device& parentDevice) :
-        Shader(parentDevice) {};
+        Shader(parentDevice) {}
 
-    PixelShader::PixelShader(Device& parentDevice) : Shader(parentDevice) {}
+    PixelShader::PixelShader(Device& parentDevice, _In_ CONST byte& byteCode, _In_ size_t byteCodeLength, WeakHash hash) :
+        Shader(parentDevice, byteCode, byteCodeLength, hash) {}
 
-    GeometryShader::GeometryShader(Device& parentDevice) : Shader(parentDevice) {};
+    GeometryShader::GeometryShader(Device& parentDevice, _In_ CONST byte& byteCode, _In_ size_t byteCodeLength, WeakHash hash) :
+        Shader(parentDevice, byteCode, byteCodeLength, hash) {}
+    GeometryShader::GeometryShader(Device& parentDevice) :
+        Shader(parentDevice) {}
 
     Shader::~Shader()
     {
-        if (m_d3d9ByteCode.m_ptr) { free(m_d3d9ByteCode.m_ptr); }
-    }
-
-    HRESULT Shader::Init(_In_ CONST byte& byteCode, _In_ size_t byteCodeLength)
-    {
-        m_d3d9ByteCode = SizedBuffer(malloc(byteCodeLength), byteCodeLength);
-
-        if (m_d3d9ByteCode.m_ptr == nullptr)
-        {
-            return E_OUTOFMEMORY;
-        }
-
-        memcpy(m_d3d9ByteCode.m_ptr, &byteCode, byteCodeLength);
-        m_legacyCodeHash = HashData(m_d3d9ByteCode.m_ptr, byteCodeLength);
-
-        return S_OK;
+        if (m_d3d9ByteCode.m_ptr) { delete[] m_d3d9ByteCode.m_ptr; }
     }
 
     void Shader::GenerateSignatureFromVSOutput(ShaderConv::VSOutputDecls& vsOut, DXBCInputSignatureBuilder& signature)
@@ -216,7 +188,7 @@ namespace D3D9on12
     {
         HRESULT hr = S_OK;
 
-        DerivedPixelShaderKey key(rasterStates, vsOutputDecls, GetHashForLegacyByteCode());
+        DerivedPixelShaderKey key(rasterStates, vsOutputDecls);
 
         auto derivedShader = m_derivedShaders.find(key);
 
@@ -391,7 +363,7 @@ namespace D3D9on12
     {
         HRESULT hr = S_OK;
 
-        DerivedVertexShaderKey key(rasterStates, inputLayout, GetHashForLegacyByteCode(), m_parentDevice.GetPointerToStreamFrequencies());
+        DerivedVertexShaderKey key(rasterStates, inputLayout, m_parentDevice.GetPointerToStreamFrequencies());
 
         auto derivedShader = m_derivedShaders.find(key);
 
@@ -449,8 +421,7 @@ namespace D3D9on12
     {
         HRESULT hr = S_OK;
 
-        // note: we always give a constant hash for the legacy shader code because TL shaders don't have a VS.
-        DerivedVertexShaderKey key(rasterStates, inputLayout, WeakHash(0), m_parentDevice.GetPointerToStreamFrequencies());
+        DerivedVertexShaderKey key(rasterStates, inputLayout, m_parentDevice.GetPointerToStreamFrequencies());
 
         auto derivedShader = m_derivedShaders.find(key);
 
