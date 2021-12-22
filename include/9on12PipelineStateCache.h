@@ -134,7 +134,22 @@ namespace std
 
 namespace D3D9on12
 {
-    typedef std::unordered_map<PipelineStateKey, std::unique_ptr<D3D12TranslationLayer::PipelineState>> PipelineStateCacheImpl;
+    struct PipelineStateCacheEntry
+    {
+        PipelineStateCacheEntry(const PipelineStateKey& key) : m_key(key) {}
+
+        std::unique_ptr<D3D12TranslationLayer::PipelineState> m_pPipelineState;
+        UINT64 m_timestamp;
+        std::list<std::shared_ptr<PipelineStateCacheEntry>>::iterator m_accessOrderPos;
+        PipelineStateKey m_key;
+    };
+
+    struct PipelineStateCacheImpl
+    {
+        std::list<std::shared_ptr<PipelineStateCacheEntry>> m_accessOrder;
+        std::unordered_map<PipelineStateKey, std::shared_ptr<PipelineStateCacheEntry>> m_map;
+    };
+
     struct PipelineStateCacheKeyComponent
     {
     public:
@@ -143,7 +158,15 @@ namespace D3D9on12
         { 
             for (auto &key : m_pPSOKeys)
             {
-                m_cache.erase(key);
+                auto it = m_cache.m_map.find(key);
+
+                if (it != m_cache.m_map.end())
+                {
+                    assert(m_cache.m_map.size() == m_cache.m_accessOrder.size());
+                    assert(it->second.get() == it->second->m_accessOrderPos->get());
+                    m_cache.m_accessOrder.erase(it->second->m_accessOrderPos);
+                    m_cache.m_map.erase(it);
+                }
             }
         }
 
@@ -158,6 +181,12 @@ namespace D3D9on12
         {
             m_pPSOKeys.insert(key);
         }
+
+        void RemovePSO(const PipelineStateKey& key)
+        {
+            m_pPSOKeys.erase(key);
+        }
+
     private:
         std::unordered_set<PipelineStateKey> m_pPSOKeys;
         PipelineStateCacheImpl &m_cache;
@@ -174,6 +203,7 @@ namespace D3D9on12
         PipelineStateCacheImpl &GetCache() { return m_cache; }
     private:
         void AddUses(Shader &ps, Shader &vs, PipelineStateKey key);
+        void Trim();
 
         Device &m_device;
         PipelineStateCacheImpl m_cache;

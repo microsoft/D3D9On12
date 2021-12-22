@@ -180,6 +180,8 @@ typedef void (APIENTRY *PFND3D9ON12_GETPRIVATEDDITABLE)(
 typedef struct _D3D9ON12_APP_COMPAT_INFO
 {
     DWORD AnythingTimes0Equals0ShaderMask;
+    DWORD PSOCacheTrimLimitSize;  // PSO cache will be trimmed if its size is greater then this limit
+    DWORD PSOCacheTrimLimitAge;   // We will only trim PSOs that are older then this age (age in command list age)
 } D3D9ON12_APP_COMPAT_INFO;
 
 typedef void (APIENTRY *PFND3D9ON12_SETAPPCOMPATDATA)(

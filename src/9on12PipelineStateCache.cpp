@@ -14,13 +14,32 @@ namespace D3D9on12
 
     D3D12TranslationLayer::PipelineState * PipelineStateCache::GetPipelineState(D3D12_GRAPHICS_PIPELINE_STATE_DESC &psoDesc, D3D12VertexShader* pVS, D3D12PixelShader* pPS, D3D12GeometryShader* pGS)
     {
+        Trim();
+
         PipelineStateKey key(psoDesc, pVS, pPS, pGS);
 
-        std::unique_ptr<D3D12TranslationLayer::PipelineState>& pMapEntry = m_cache[key];
-        if (pMapEntry)
+        UINT64 timestamp = m_device.GetContext().GetCommandListID(D3D12TranslationLayer::COMMAND_LIST_TYPE::GRAPHICS);
+
+        auto it = m_cache.m_map.find(key);
+
+        if (it != m_cache.m_map.end())
         {
-            return pMapEntry.get();
+            std::shared_ptr<PipelineStateCacheEntry>& cacheEntry = it->second;
+            assert(cacheEntry.get() == cacheEntry->m_accessOrderPos->get());
+            m_cache.m_accessOrder.erase(cacheEntry->m_accessOrderPos);
+            m_cache.m_accessOrder.emplace_front(cacheEntry);
+            cacheEntry->m_accessOrderPos = m_cache.m_accessOrder.begin();
+            cacheEntry->m_timestamp = timestamp;
+            return cacheEntry->m_pPipelineState.get();
         }
+
+        std::shared_ptr<PipelineStateCacheEntry> cacheEntry = std::make_shared<PipelineStateCacheEntry>(key);
+        m_cache.m_accessOrder.emplace_front(cacheEntry);
+        cacheEntry->m_accessOrderPos = m_cache.m_accessOrder.begin();
+        cacheEntry->m_timestamp = timestamp;
+
+        m_cache.m_map[key] = cacheEntry;
+        assert(m_cache.m_map.size() == m_cache.m_accessOrder.size());
 
         D3D12TranslationLayer::GRAPHICS_PIPELINE_STATE_DESC desc = {};
         desc.pVertexShader = pVS->GetUnderlying();
@@ -42,19 +61,56 @@ namespace D3D9on12
         VerifyPipelineState(desc);
 
         // No cached PSO exists, time to create one
-        pMapEntry.reset(new D3D12TranslationLayer::PipelineState(&m_device.GetContext(), desc)); // throw( bad_alloc, _com_error )
+        cacheEntry->m_pPipelineState.reset(new D3D12TranslationLayer::PipelineState(&m_device.GetContext(), desc)); // throw( bad_alloc, _com_error )
 
         Check9on12(pPS->GetD3D9ParentShader());
         Check9on12(pVS->GetD3D9ParentShader());
         AddUses(*pPS->GetD3D9ParentShader(), *pVS->GetD3D9ParentShader(), key);
 
-        return pMapEntry.get();
+        return cacheEntry->m_pPipelineState.get();
     }
 
     void PipelineStateCache::AddUses(Shader &ps, Shader &vs, PipelineStateKey key)
     {
         vs.AddPSO(key);
         ps.AddPSO(key);
+    }
+
+    void PipelineStateCache::Trim()
+    {
+        DWORD psoCacheTrimLimitSize = min(RegistryConstants::g_cPSOCacheTrimLimitSize, g_AppCompatInfo.PSOCacheTrimLimitSize);
+
+        if (psoCacheTrimLimitSize == MAXDWORD)
+            return;
+
+        DWORD psoCacheTrimLimitAge = min(RegistryConstants::g_cPSOCacheTrimLimitAge, g_AppCompatInfo.PSOCacheTrimLimitAge);
+
+        if (psoCacheTrimLimitAge == MAXDWORD)
+            return;
+
+        UINT64 timestamp = m_device.GetContext().GetCommandListID(D3D12TranslationLayer::COMMAND_LIST_TYPE::GRAPHICS);
+
+        while (m_cache.m_map.size() > (size_t)psoCacheTrimLimitSize)
+        {
+            if (m_cache.m_accessOrder.empty())
+                break;
+
+            UINT64 age = timestamp - m_cache.m_accessOrder.back()->m_timestamp;
+
+            if (age > (UINT64)psoCacheTrimLimitAge)
+            {
+                std::shared_ptr<PipelineStateCacheEntry> cacheEntry = m_cache.m_accessOrder.back();
+                m_cache.m_accessOrder.pop_back();
+
+                cacheEntry->m_key.m_desc.m_pPS->GetD3D9ParentShader()->RemovePSO(cacheEntry->m_key);
+                cacheEntry->m_key.m_desc.m_pVS->GetD3D9ParentShader()->RemovePSO(cacheEntry->m_key);
+                m_cache.m_map.erase(cacheEntry->m_key);
+            }
+            else
+            {
+                break;
+            }
+        }
     }
 
     UINT8 PipelineStateKey::D3D9on12PipelineStateDesc::CompressedData::CompressDepthFormat(DXGI_FORMAT format)
