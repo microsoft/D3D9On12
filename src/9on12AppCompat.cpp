@@ -8,7 +8,8 @@ namespace D3D9on12
     {
         0, // AnythingTimes0Equals0ShaderMask
         MAXDWORD, // PSOCacheTrimLimitSize
-        MAXDWORD  // PSOCacheTrimLimitAge
+        MAXDWORD, // PSOCacheTrimLimitAge
+        MAXDWORD  // MaxAllocatedUploadHeapSpacePerCommandList
     };
 
     void APIENTRY SetAppCompatData(const D3D9ON12_APP_COMPAT_INFO *pAppCompatData)
