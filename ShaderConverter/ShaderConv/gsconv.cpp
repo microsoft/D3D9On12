@@ -715,6 +715,7 @@ CGSContext::WriteOutputs()
                     }
                     else if (usage == D3DDECLUSAGE_POINTSPRITE)
                     {
+                        UNREFERENCED_PARAMETER(isPointSpriteEnable);
                         SHADER_CONV_ASSERT(isPointSpriteEnable);
                         const float vTexCoords[4][2] = {
                             { 0.0f, 0.0f },
