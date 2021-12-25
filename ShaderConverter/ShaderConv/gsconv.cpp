@@ -433,7 +433,7 @@ CGSContext::WriteOutputs()
     const bool isPointSizeEnable     = m_pShaderDesc->PointSizeEnable();
     const bool isPointFillEnable     = m_pShaderDesc->PointFillEnable();
     const bool isFlatColorFillEnable = m_pShaderDesc->FlatColorFillEnable();
-    const bool isPointSpriteEnable   = m_pShaderDesc->PointSpriteEnable();
+    [[maybe_unused]] const bool isPointSpriteEnable   = m_pShaderDesc->PointSpriteEnable();
     const bool isTextureWrapEnable   = m_pShaderDesc->TextureWrapEnable();
     const bool hasTLVertices         = m_pShaderDesc->HasTLVertices();
     const UINT userClipPlanes        = m_pShaderDesc->GetUserClipPlanes();
