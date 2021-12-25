@@ -405,6 +405,9 @@ namespace D3D9on12
 #ifdef __D3D9On12CreatorID_INTERFACE_DEFINED__
             args.CreatorID = __uuidof(D3D9On12CreatorID);
 #endif
+            args.MaxAllocatedUploadHeapSpacePerCommandList =
+                min(RegistryConstants::g_cMaxAllocatedUploadHeapSpacePerCommandList,
+                    g_AppCompatInfo.MaxAllocatedUploadHeapSpacePerCommandList);
 
             m_pImmediateContext.emplace(
                 0,
