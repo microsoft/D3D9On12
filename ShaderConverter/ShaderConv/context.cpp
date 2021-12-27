@@ -3692,8 +3692,7 @@ CContext::EmitSrcOperand( const CInstr& instr,
 
     if (dwRegType == D3DSPR_TEXTURE)
     {
-        const DWORD dwRegNum = D3DSI_GETREGNUM_RESOLVING_CONSTANTS(dwToken) + dwOffset;
-        UNREFERENCED_PARAMETER(dwRegNum);
+        [[maybe_unused]] const DWORD dwRegNum = D3DSI_GETREGNUM_RESOLVING_CONSTANTS(dwToken) + dwOffset;
         SHADER_CONV_ASSERT(dwRegNum < MAX_PS_TEXCOORD_REGS);
     }
 
