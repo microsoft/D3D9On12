@@ -18,7 +18,7 @@ endif()
 FetchContent_Declare(
     d3d12translationlayer
     GIT_REPOSITORY https://github.com/microsoft/D3D12TranslationLayer.git
-    GIT_TAG        e1797c28f4345e70ae5a32ccec365b5b2bf65cb7
+    GIT_TAG        af09819e9b60d3e589daf0ed49bf793583107bc2
 )
 FetchContent_MakeAvailable(d3d12translationlayer)
 

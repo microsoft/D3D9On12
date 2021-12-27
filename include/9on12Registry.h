@@ -27,6 +27,8 @@ namespace D3D9on12
         static const LPCSTR g_cAnythingTimes0Equals0 = "AnythingTimes0Equals0";
         static const LPCSTR g_cPSOCacheTrimLimitSize = "PSOCacheTrimLimitSize";
         static const LPCSTR g_cPSOCacheTrimLimitAge = "PSOCacheTrimLimitAge";
+        static const LPCSTR g_cMaxAllocatedUploadHeapSpacePerCommandList = "MaxAllocatedUploadHeapSpacePerCommandList";
+        static const LPCSTR g_cMaxSRVHeapSize = "MaxSRVHeapSize";        
     };
 
     static DWORD CheckRegistryKeyDWORD(LPCSTR key, DWORD defaultValue = 0)
@@ -100,5 +102,7 @@ namespace D3D9on12
         static const bool g_cDisableMemoryManagement = CheckRegistryKey(RegistryKeys::g_cDisableMemoryManagement);
         static const DWORD g_cPSOCacheTrimLimitSize = CheckRegistryKeyDWORD(RegistryKeys::g_cPSOCacheTrimLimitSize, MAXDWORD);
         static const DWORD g_cPSOCacheTrimLimitAge = CheckRegistryKeyDWORD(RegistryKeys::g_cPSOCacheTrimLimitAge, MAXDWORD);
+        static const DWORD g_cMaxAllocatedUploadHeapSpacePerCommandList = CheckRegistryKeyDWORD(RegistryKeys::g_cMaxAllocatedUploadHeapSpacePerCommandList, MAXDWORD);
+        static const DWORD g_cMaxSRVHeapSize = CheckRegistryKeyDWORD(RegistryKeys::g_cMaxSRVHeapSize, MAXDWORD);
     };
 };
