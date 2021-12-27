@@ -409,6 +409,8 @@ namespace D3D9on12
                 min(RegistryConstants::g_cMaxAllocatedUploadHeapSpacePerCommandList,
                     g_AppCompatInfo.MaxAllocatedUploadHeapSpacePerCommandList);
 
+            args.MaxSRVHeapSize = min(RegistryConstants::g_cMaxSRVHeapSize, g_AppCompatInfo.MaxSRVHeapSize);
+
             m_pImmediateContext.emplace(
                 0,
                 FeatureDataD3D12,
