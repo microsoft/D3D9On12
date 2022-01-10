@@ -246,8 +246,7 @@ namespace D3D9on12
 
         if (m_dirtyFlags.VSExtension)
         {
-            hr = device.GetConstantsManager().UpdateVertexShaderExtension(m_VSExtension.GetVSCBExtension());
-            CHECK_HR(hr);
+            device.GetConstantsManager().UpdateVertexShaderExtension(m_VSExtension.GetVSCBExtension());
         }
 
         if (m_dirtyFlags.VertexShader || m_dirtyFlags.InputLayout)
@@ -303,8 +302,7 @@ namespace D3D9on12
             {
                 m_pCurrentD3D12GS = &geo;
 
-                hr = device.GetConstantsManager().UpdateGeometryShaderExtension(m_VSExtension.GetVSCBExtension());
-                CHECK_HR(hr);
+                device.GetConstantsManager().UpdateGeometryShaderExtension(m_VSExtension.GetVSCBExtension());
             }
         }
         else
