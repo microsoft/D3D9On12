@@ -41,7 +41,7 @@ namespace D3D9on12
             m_allocator(device, 1024*1024, D3D12_CONSTANT_BUFFER_DATA_PLACEMENT_ALIGNMENT),
             m_shaderRegister(shaderRegister){};
 
-        HRESULT Version(const void* pData, UINT dataSize);
+        void Version(const void* pData, UINT dataSize);
         void Destroy();
 
         // Because a roll over may happen at any time, 
@@ -79,22 +79,22 @@ namespace D3D9on12
                 m_dataDirty = true;
             }
 
-            HRESULT UpdateData(Device& /*device*/, UINT maxSet)
+            Result UpdateData(Device& /*device*/, UINT maxSet)
             {
-                HRESULT hr = S_OK;
+                Result result = Result::S_SUCCESS;
                 // Even if the contents aren't dirty, we should update the data if 
                 // the maxSet has increased from the last binding
                 if ((m_dataDirty || maxSet > m_lastCopySize) && maxSet)
                 {
                     UINT dataSize = min(maxSet * m_sizePerElement, static_cast<UINT>(m_data.size()));
-                    hr = m_binding.Version(m_data.data(), dataSize);
+                    m_binding.Version(m_data.data(), dataSize);
 
                     m_dataDirty = false;
                     m_lastCopySize = maxSet;
+                    result = Result::S_CHANGE;
                 }
 
-                CHECK_HR(hr);
-                return hr;
+                return result;
             }
 
             void ReplaceResource(ConstantBufferBinding& nullCB)
@@ -138,8 +138,8 @@ namespace D3D9on12
                 }
             }
 
-            HRESULT UpdateAppVisibileBindings(Device& device, UINT maxFloats, UINT maxInts, UINT maxBools);
-            HRESULT BindAppVisibleToPipeline(Device& device, UINT maxFloats, UINT maxInts, UINT maxBools);
+            Result UpdateAppVisibileBindings(Device& device, UINT maxFloats, UINT maxInts, UINT maxBools);
+            void BindAppVisibleToPipeline(Device& device, UINT maxFloats, UINT maxInts, UINT maxBools);
             void NullOutBindings(Device& device, ConstantBufferBinding& nullCB);
 
         private:
@@ -196,17 +196,17 @@ namespace D3D9on12
 
         HRESULT Init();
 
-        HRESULT BindShaderConstants();
+        Result BindShaderConstants();
 
         VertexShaderConstants& GetVertexShaderConstants() { return m_vertexShaderData; }
         PixelShaderConstants& GetPixelShaderConstants() { return m_pixelShaderData; }
         ConstantBufferBinding& NullCB() { return m_nullCB; }
 
-        HRESULT UpdateVertexShaderExtension(const ShaderConv::VSCBExtension& data);
-        HRESULT UpdateGeometryShaderExtension(const ShaderConv::VSCBExtension& data);
-        HRESULT UpdatePixelShaderExtension(const ShaderConv::eConstantBuffers extension, const void* pData, size_t dataSize);
+        void UpdateVertexShaderExtension(const ShaderConv::VSCBExtension& data);
+        void UpdateGeometryShaderExtension(const ShaderConv::VSCBExtension& data);
+        Result UpdatePixelShaderExtension(const ShaderConv::eConstantBuffers extension, const void* pData, size_t dataSize);
 
-        static HRESULT BindToPipeline(Device& device, ConstantBufferBinding& buffer, D3D12TranslationLayer::EShaderStage shaderStage);
+        static void BindToPipeline(Device& device, ConstantBufferBinding& buffer, D3D12TranslationLayer::EShaderStage shaderStage);
 
     private:
 
