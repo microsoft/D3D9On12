@@ -35,6 +35,58 @@ namespace D3D9on12
         }
     };
 
+    class Result
+    {
+    public:
+        enum Value : uint8_t
+        {
+            S_SUCCESS = 0x00,
+            S_CHANGE = 0x01,
+            E_FAILURE = 0x10,
+            E_INVALID_ARG = 0x20
+        };
+
+        Result() = default;
+        constexpr Result(Value result) : value(result) {}
+
+        constexpr Result operator||(const Result result) { return result.value > value ? result : *this; }
+
+        constexpr bool Succeeded() const { return value < Result::E_FAILURE; }
+        constexpr bool Failed() const { return value >= Result::E_FAILURE; }
+        constexpr bool operator==(Result other) const noexcept { return value == other.value; }
+        constexpr bool operator!=(Result other) const noexcept { return value != other.value; }
+
+        //Get the underlying enum value. This allows nice switch syntax without enabling implicit casting of Result to HRESULT
+        constexpr Value AsEnum() const { return value; }
+        //Explicit way of translating to HRESULT for communicating with parts of the codebase that haven't been migrated from HRESULT.
+        constexpr HRESULT AsHresult() const 
+        {
+            switch (value)
+            {
+            case S_SUCCESS:
+            case S_CHANGE:
+                return S_OK;
+            case E_FAILURE: return E_FAIL;
+            case E_INVALID_ARG: return E_INVALIDARG;
+            default:
+                Check9on12(false);
+                return E_ILLEGAL_STATE_CHANGE;
+            }
+        }
+
+        /* Updates the result such that the higher valued result takes precedence */
+        void Update(Result newResult)
+        {
+            if (newResult.value > value)
+            {
+                value = newResult.value;
+            }
+        }
+
+    private:
+        Value value;
+    };
+
 #define D3D9on12_DDI_ENTRYPOINT_START(implemented) \
 __pragma(warning(suppress:4127)) /* conditional is constant due to constant macro parameter(s) */ \
     if((implemented) == false && RegistryConstants::g_cBreakOnMissingDDI) \
