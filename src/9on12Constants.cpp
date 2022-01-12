@@ -4,11 +4,11 @@
 
 namespace D3D9on12
 {
-    _Check_return_ HRESULT APIENTRY SetVertexShaderConstF(_In_ HANDLE hDevice, _In_ const D3DDDIARG_SETVERTEXSHADERCONST *pRegisters, _In_ const VOID *pData)
+    _Check_return_ HRESULT APIENTRY SetVertexShaderConstF(_In_ HANDLE hDevice, _In_ const D3DDDIARG_SETVERTEXSHADERCONST* pRegisters, _In_ const VOID* pData)
     {
         D3D9on12_DDI_ENTRYPOINT_START(TRUE);
 
-        Device *pDevice = Device::GetDeviceFromHandle(hDevice);
+        Device* pDevice = Device::GetDeviceFromHandle(hDevice);
         if (pDevice == nullptr || pRegisters == nullptr || (pRegisters->Count > 0 && pData == nullptr))
         {
             RETURN_E_INVALIDARG_AND_CHECK();
@@ -46,11 +46,11 @@ namespace D3D9on12
         D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }
 
-    _Check_return_ HRESULT APIENTRY SetPixelShaderConstF(_In_ HANDLE hDevice, _In_ const D3DDDIARG_SETPIXELSHADERCONST *pRegisters, _In_ const FLOAT *pData)
+    _Check_return_ HRESULT APIENTRY SetPixelShaderConstF(_In_ HANDLE hDevice, _In_ const D3DDDIARG_SETPIXELSHADERCONST* pRegisters, _In_ const FLOAT* pData)
     {
         D3D9on12_DDI_ENTRYPOINT_START(TRUE);
 
-        Device *pDevice = Device::GetDeviceFromHandle(hDevice);
+        Device* pDevice = Device::GetDeviceFromHandle(hDevice);
         if (pDevice == nullptr || pRegisters == nullptr || (pRegisters->Count > 0 && pData == nullptr))
         {
             RETURN_E_INVALIDARG_AND_CHECK();
@@ -75,7 +75,7 @@ namespace D3D9on12
         D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }
 
-    _Check_return_ HRESULT APIENTRY SetPixelShaderConstB(_In_ HANDLE hDevice, _In_ CONST D3DDDIARG_SETPIXELSHADERCONSTB* pRegisters, _In_ CONST BOOL*pData)
+    _Check_return_ HRESULT APIENTRY SetPixelShaderConstB(_In_ HANDLE hDevice, _In_ CONST D3DDDIARG_SETPIXELSHADERCONSTB* pRegisters, _In_ CONST BOOL* pData)
     {
         D3D9on12_DDI_ENTRYPOINT_START(TRUE);
         Device* pDevice = Device::GetDeviceFromHandle(hDevice);
@@ -170,35 +170,18 @@ namespace D3D9on12
         m_extension.Destroy();
     }
 
-    Result ConstantsManager::StageConstants::UpdateAppVisibileBindings(Device&device, UINT maxFloats, UINT maxInts, UINT maxBools)
+    void ConstantsManager::StageConstants::UpdateAppVisibleAndBindToPipeline(Device& device, UINT maxFloats, UINT maxInts, UINT maxBools)
     {
-        Result result = Result::S_SUCCESS;
-
         Check9on12(maxFloats % 4 == 0);
-        result.Update(m_floats.UpdateData(device, maxFloats/ 4));
-        if (result.Succeeded())
-        {
-            Check9on12(maxInts % 4 == 0);
-            result.Update(m_integers.UpdateData(device, maxInts / 4));
-        }
-        if (result.Succeeded())
-        {
-            result.Update(m_booleans.UpdateData(device, maxBools));
-        }
-
-        Check9on12(result.Succeeded());
-        return result;
-    }
-
-    void ConstantsManager::StageConstants::BindAppVisibleToPipeline(Device& device, UINT maxFloats, UINT maxInts, UINT maxBools)
-    {
-
-        if (maxFloats)
+        Result result = m_floats.UpdateData(device, maxFloats / 4);
+        if (maxFloats && result == Result::S_CHANGE)
         {
             BindToPipeline(device, m_floats.m_binding, m_shaderType);
         }
 
-        if (maxInts)
+        Check9on12(maxInts % 4 == 0);
+        result = m_integers.UpdateData(device, maxInts / 4);
+        if (maxInts && result == Result::S_CHANGE)
         {
             BindToPipeline(device, m_integers.m_binding, m_shaderType);
         }
@@ -216,52 +199,22 @@ namespace D3D9on12
         m_booleans.ReplaceResource(nullCB);
     }
 
-    Result ConstantsManager::BindShaderConstants()
+    void ConstantsManager::BindShaderConstants()
     {
-        Result vsResult = Result::S_SUCCESS;
-        Result psResult = Result::S_SUCCESS;
-
         D3D12VertexShader* pVs = m_device.GetPipelineState().GetVertexStage().GetCurrentD3D12VertexShader();
         D3D12PixelShader* pPs = m_device.GetPipelineState().GetPixelStage().GetCurrentD3D12PixelShader();
 
-        // Update the underlying constant buffer resources with data that may have changed
-        {
-            vsResult = m_vertexShaderData.UpdateAppVisibileBindings(m_device, pVs->m_floatConstsUsed, pVs->m_intConstsUsed, pVs->m_boolConstsUsed);
-
-            if (vsResult.Succeeded())
-            {
-                psResult = m_pixelShaderData.UpdateAppVisibileBindings(m_device, pPs->m_floatConstsUsed, pPs->m_intConstsUsed, pPs->m_boolConstsUsed);
-            }
-        }
-        Result bothResult = vsResult || psResult;
-
-        // Apply the bindings
-        {
-            if (bothResult.Succeeded())
-            {
-                m_vertexShaderData.BindAppVisibleToPipeline(m_device, pVs->m_floatConstsUsed, pVs->m_intConstsUsed, pVs->m_boolConstsUsed);
-            }
-
-            if (bothResult.Succeeded())
-            {
-                m_pixelShaderData.BindAppVisibleToPipeline(m_device, pPs->m_floatConstsUsed, pPs->m_intConstsUsed, pPs->m_boolConstsUsed);
-            }
-        }
+        m_vertexShaderData.UpdateAppVisibleAndBindToPipeline(m_device, pVs->m_floatConstsUsed, pVs->m_intConstsUsed, pVs->m_boolConstsUsed);
+        m_pixelShaderData.UpdateAppVisibleAndBindToPipeline(m_device, pPs->m_floatConstsUsed, pPs->m_intConstsUsed, pPs->m_boolConstsUsed);
 
         //Bind Internal Extension Constants (used by the Shader Converter)
         {
-            if (bothResult.Succeeded())
-            {
-                BindToPipeline(m_device, m_vertexShaderData.m_extension, D3D12TranslationLayer::EShaderStage::e_VS);
-                BindToPipeline(m_device, m_geometryShaderData.m_extension, D3D12TranslationLayer::EShaderStage::e_GS);
-                BindToPipeline(m_device, m_pixelShaderData.m_extension1, D3D12TranslationLayer::EShaderStage::e_PS);
-                BindToPipeline(m_device, m_pixelShaderData.m_extension2, D3D12TranslationLayer::EShaderStage::e_PS);
-                BindToPipeline(m_device, m_pixelShaderData.m_extension3, D3D12TranslationLayer::EShaderStage::e_PS);
-            }
+            BindToPipeline(m_device, m_vertexShaderData.m_extension, D3D12TranslationLayer::EShaderStage::e_VS);
+            BindToPipeline(m_device, m_geometryShaderData.m_extension, D3D12TranslationLayer::EShaderStage::e_GS);
+            BindToPipeline(m_device, m_pixelShaderData.m_extension1, D3D12TranslationLayer::EShaderStage::e_PS);
+            BindToPipeline(m_device, m_pixelShaderData.m_extension2, D3D12TranslationLayer::EShaderStage::e_PS);
+            BindToPipeline(m_device, m_pixelShaderData.m_extension3, D3D12TranslationLayer::EShaderStage::e_PS);
         }
-
-        Check9on12(bothResult.Succeeded());
-        return bothResult;
     }
 
     void ConstantsManager::UpdateVertexShaderExtension(const ShaderConv::VSCBExtension& data)
@@ -271,12 +224,12 @@ namespace D3D9on12
 
     void ConstantsManager::UpdateGeometryShaderExtension(const ShaderConv::VSCBExtension& data)
     {
-        m_geometryShaderData.m_extension.Version( &data, sizeof(data));
+        m_geometryShaderData.m_extension.Version(&data, sizeof(data));
     }
 
     Result ConstantsManager::UpdatePixelShaderExtension(const ShaderConv::eConstantBuffers extension, const void* pData, size_t dataSize)
     {
-        ConstantBufferBinding *pBinding;
+        ConstantBufferBinding* pBinding;
         switch (extension)
         {
         case ShaderConv::CB_PS_EXT:
