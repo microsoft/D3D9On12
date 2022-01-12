@@ -479,7 +479,7 @@ namespace D3D9on12
 
         m_dirtyFlags.Textures |= textureDirtyMaskToKeep;
 
-        hr = device.GetConstantsManager().BindShaderConstants().AsHresult();
+        device.GetConstantsManager().BindShaderConstants();
         CHECK_HR(hr);
 
         return hr;

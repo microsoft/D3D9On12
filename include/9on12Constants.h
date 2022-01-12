@@ -84,7 +84,7 @@ namespace D3D9on12
                 Result result = Result::S_SUCCESS;
                 // Even if the contents aren't dirty, we should update the data if 
                 // the maxSet has increased from the last binding
-                if ((m_dataDirty || maxSet > m_lastCopySize) && maxSet)
+                if (maxSet && (m_dataDirty || maxSet > m_lastCopySize))
                 {
                     UINT dataSize = min(maxSet * m_sizePerElement, static_cast<UINT>(m_data.size()));
                     m_binding.Version(m_data.data(), dataSize);
@@ -138,8 +138,7 @@ namespace D3D9on12
                 }
             }
 
-            Result UpdateAppVisibileBindings(Device& device, UINT maxFloats, UINT maxInts, UINT maxBools);
-            void BindAppVisibleToPipeline(Device& device, UINT maxFloats, UINT maxInts, UINT maxBools);
+            void UpdateAppVisibleAndBindToPipeline(Device& device, UINT maxFloats, UINT maxInts, UINT maxBools);
             void NullOutBindings(Device& device, ConstantBufferBinding& nullCB);
 
         private:
@@ -196,7 +195,7 @@ namespace D3D9on12
 
         HRESULT Init();
 
-        Result BindShaderConstants();
+        void BindShaderConstants();
 
         VertexShaderConstants& GetVertexShaderConstants() { return m_vertexShaderData; }
         PixelShaderConstants& GetPixelShaderConstants() { return m_pixelShaderData; }
