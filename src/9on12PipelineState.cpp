@@ -68,6 +68,7 @@ namespace D3D9on12
         case D3DRS_SLOPESCALEDEPTHBIAS:
         case D3DRS_MULTISAMPLEANTIALIAS:
         case D3DRS_ANTIALIASEDLINEENABLE:
+        case D3DRS_CLIPPING:
             m_pixelStage.SetRasterState(dwState, dwValue);
             break;
             // DepthStencil states  

@@ -189,6 +189,7 @@ namespace D3D9on12
 
     HRESULT PixelStage::Init(Device& /*device*/)
     {
+        SetRasterState(D3DRS_CLIPPING, 1); //d3d9 defaults this raster state to 1
         return S_OK;
     }
 
@@ -341,6 +342,10 @@ namespace D3D9on12
             m_rasterizerStateID.AntialiasedLineEnable = dwValue;
             m_dirtyFlags.RasterizerState = true;
             break;
+        case D3DRS_CLIPPING:
+            m_rasterizerStateID.DepthClipEnable = dwValue;
+            m_dirtyFlags.RasterizerState = true;
+            break;
         default:
             Check9on12(false);
         }
@@ -355,7 +360,6 @@ namespace D3D9on12
             // DepthStencil states  
         case D3DRS_ZENABLE:
             m_depthStencilStateID.ZEnable = dwValue;
-            m_rasterizerStateID.DepthClipEnable = dwValue;
             m_dirtyFlags.DepthStencilState = true;
             m_dirtyFlags.RasterizerState = true;
             break;
