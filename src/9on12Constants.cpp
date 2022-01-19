@@ -186,7 +186,8 @@ namespace D3D9on12
             BindToPipeline(device, m_integers.m_binding, m_shaderType);
         }
 
-        if (maxBools)
+        result = m_booleans.UpdateData(device, maxBools);
+        if (maxBools && result == Result::S_CHANGE)
         {
             BindToPipeline(device, m_booleans.m_binding, m_shaderType);
         }
