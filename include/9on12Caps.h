@@ -94,7 +94,7 @@ namespace D3D9on12
         D3DPMISCCAPS_POSTBLENDSRGBCONVERT |
         0,
         // RasterCaps,  
-        //D3DPRASTERCAPS_DITHER |  
+        D3DPRASTERCAPS_DITHER |  
         //D3DPRASTERCAPS_ROP2 |  
         //D3DPRASTERCAPS_XOR |  
         //D3DPRASTERCAPS_PAT |  
@@ -838,7 +838,7 @@ namespace D3D9on12
             0,
 
             // dwRasterCaps
-            //D3DPRASTERCAPS_DITHER |
+            D3DPRASTERCAPS_DITHER |
             //D3DPRASTERCAPS_ROP2 |
             //D3DPRASTERCAPS_XOR |
             //D3DPRASTERCAPS_PAT |
@@ -1060,7 +1060,7 @@ namespace D3D9on12
             0,
 
             // dwRasterCaps
-            //D3DPRASTERCAPS_DITHER |
+            D3DPRASTERCAPS_DITHER |
             //D3DPRASTERCAPS_ROP2 |
             //D3DPRASTERCAPS_XOR |
             //D3DPRASTERCAPS_PAT |
