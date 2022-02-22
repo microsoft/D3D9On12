@@ -37,6 +37,8 @@ namespace D3D9on12
         D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(hr);
     }
 
+    extern std::unordered_map<Resource*, std::vector<LockRange>> g_umapDiscardResources;
+
     HRESULT Device::Present(CONST D3DDDIARG_PRESENT1& PresentArgs, D3DKMT_PRESENT* pKMTArgs)
     {
         Check9on12(PresentArgs.SrcResources == 1);
@@ -59,7 +61,11 @@ namespace D3D9on12
             auto swapChainHelper = D3D12TranslationLayer::SwapChainHelper( pSwapChain );
             m_SwapChainManager->WaitForMaximumFrameLatency();
 
-            return swapChainHelper.StandardPresent( GetContext(), pKMTArgs, *pSrcTranslationLayerResource );
+            auto ret = swapChainHelper.StandardPresent( GetContext(), pKMTArgs, *pSrcTranslationLayerResource );
+
+            g_umapDiscardResources.clear();
+
+            return ret;
         }
         else
         {

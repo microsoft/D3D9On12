@@ -639,6 +639,8 @@ namespace D3D9on12
         memset(&m_TranslationLayerCreateArgs, 0, sizeof(m_TranslationLayerCreateArgs));
     }
 
+    std::unordered_map<Resource*, std::vector<LockRange>> g_umapDiscardResources;
+
     Resource::~Resource()
     {
         if (m_pBackingShaderResource)
@@ -690,6 +692,8 @@ namespace D3D9on12
                 m_pDepthStencilViews[i]->~View();
             }
         }
+
+        g_umapDiscardResources.erase(this);
 
         m_pResource.reset(nullptr);
     }
@@ -1381,7 +1385,77 @@ namespace D3D9on12
         }
 
         mapType = GetMapTypeFlag(flags.ReadOnly, flags.WriteOnly, flags.Discard, flags.NoOverwrite, m_isDecodeCompressedBuffer, m_pResource->AppDesc()->CPUAccessFlags());
-        
+
+        if (RegistryConstants::g_cLockDiscardOptimization)
+        {
+            bool bOptimizationForGamesThatDiscardBuffersAndUpdateNonOoverlappingRegions = false;
+
+            // Figure out if we are running Unigine Valley
+            WCHAR path[MAX_PATH];
+            GetModuleFileNameW(NULL, path, MAX_PATH);
+            if (wcsstr(path, L"Valley"))
+            {
+                bOptimizationForGamesThatDiscardBuffersAndUpdateNonOoverlappingRegions = true;
+            }
+
+            if (bOptimizationForGamesThatDiscardBuffersAndUpdateNonOoverlappingRegions)
+            {
+                // For games that always lock non-overlapping regions with the discard flag set, no need to check the lock regions
+                if (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD)
+                {
+                    if (g_umapDiscardResources.count(this))
+                    {
+                        mapType = D3D12TranslationLayer::MAP_TYPE_WRITE_NOOVERWRITE;
+                    }
+                    else
+                    {
+                        g_umapDiscardResources[this].push_back(lockRange);
+                    }
+                }
+            }
+            else
+            {
+                if (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD)
+                {
+                    // check if buffer is in the map
+                    // if it is, get a list of previously mapped ranges
+                    if (g_umapDiscardResources.count(this))
+                    {
+                        bool overlapsWithPreviouslyMappedRanges = false;
+
+                        UINT currentRangeX1 = lockRange.Range.Offset;
+                        UINT currentRangeX2 = lockRange.Range.Offset + lockRange.Range.Size;
+
+                        auto mappedRanges = g_umapDiscardResources[this];
+                        // compare current range with previously mapped ranges
+                        for (const auto& mappedRange : mappedRanges)
+                        {
+                            UINT mappedRangeX1 = mappedRange.Range.Offset;
+                            UINT mappedRangeX2 = mappedRange.Range.Offset + mappedRange.Range.Size;
+
+                            if (((currentRangeX1 >= mappedRangeX1) && (currentRangeX1 < mappedRangeX2)) ||
+                                ((currentRangeX2 >= mappedRangeX1) && (currentRangeX2 < mappedRangeX2)))
+                            {
+                                overlapsWithPreviouslyMappedRanges = true;
+                                break;
+                            }
+                        }
+
+                        // if the newly mapped range doesn't intersect previously mapped ranges - add it to the list and change flag to NO_OVERWRITE
+                        if (!overlapsWithPreviouslyMappedRanges)
+                        {
+                            mapType = D3D12TranslationLayer::MAP_TYPE_WRITE_NOOVERWRITE;
+                        }
+                        else // else clear the list of ranges, add the current range, and keep the DISCARD flag
+                        {
+                            g_umapDiscardResources[this].clear();
+                        }
+                    }
+                    g_umapDiscardResources[this].push_back(lockRange);
+                }
+            }
+        }
+
         if (bAsyncLock)
         {
             CD3DX12_RANGE ReadRange(0, 0);
