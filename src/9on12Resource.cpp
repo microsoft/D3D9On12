@@ -1388,69 +1388,66 @@ namespace D3D9on12
 
         if (RegistryConstants::g_cLockDiscardOptimization)
         {
-            bool bOptimizationForGamesThatDiscardBuffersAndUpdateNonOoverlappingRegions = false;
-
-            // Figure out if we are running Unigine Valley
-            WCHAR path[MAX_PATH];
-            GetModuleFileNameW(NULL, path, MAX_PATH);
-            if (wcsstr(path, L"Valley"))
+            if (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD)
             {
-                bOptimizationForGamesThatDiscardBuffersAndUpdateNonOoverlappingRegions = true;
-            }
-
-            if (bOptimizationForGamesThatDiscardBuffersAndUpdateNonOoverlappingRegions)
-            {
-                // For games that always lock non-overlapping regions with the discard flag set, no need to check the lock regions
-                if (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD)
+                // Check if buffer is in the map
+                // If it is, get a list of previously mapped ranges
+                if (g_umapDiscardResources.count(this))
                 {
-                    if (g_umapDiscardResources.count(this))
+                    bool overlapsWithPreviouslyMappedRanges = false;
+                    bool mergedWithExistingMappedRange = false;
+
+                    UINT currentRangeX1 = lockRange.Range.Offset;
+                    UINT currentRangeX2 = lockRange.Range.Offset + lockRange.Range.Size;
+
+                    auto mappedRanges = g_umapDiscardResources[this];
+                    // Compare current range with previously mapped ranges
+                    for (auto& mappedRange : mappedRanges)
+                    {
+                        UINT mappedRangeX1 = mappedRange.Range.Offset;
+                        UINT mappedRangeX2 = mappedRange.Range.Offset + mappedRange.Range.Size;
+
+                        if (((currentRangeX1 >= mappedRangeX1) && (currentRangeX1 < mappedRangeX2)) ||
+                            ((currentRangeX2 >= mappedRangeX1) && (currentRangeX2 < mappedRangeX2)))
+                        {
+                            overlapsWithPreviouslyMappedRanges = true;
+                            break;
+                        }
+
+                        // If the current range is a neighbor of an existing mapped range, merge it with the neighbor
+                        if (mappedRangeX2 == currentRangeX1)
+                        {
+                            mappedRange.Range.Size += lockRange.Range.Size;
+
+                            mergedWithExistingMappedRange = true;
+                            break;
+                        }
+                        if (mappedRangeX1 == currentRangeX2)
+                        {
+                            mappedRange.Range.Offset = lockRange.Range.Offset;
+
+                            mergedWithExistingMappedRange = true;
+                            break;
+                        }
+                    }
+
+                    // If the newly mapped range doesn't intersect previously mapped ranges - add it to the list and change flag to NO_OVERWRITE
+                    if (!overlapsWithPreviouslyMappedRanges)
                     {
                         mapType = D3D12TranslationLayer::MAP_TYPE_WRITE_NOOVERWRITE;
                     }
-                    else
+                    else // Else clear the list of ranges, add the current range, and keep the DISCARD flag
+                    {
+                        g_umapDiscardResources[this].clear();
+                    }
+
+                    if (!mergedWithExistingMappedRange)
                     {
                         g_umapDiscardResources[this].push_back(lockRange);
                     }
                 }
-            }
-            else
-            {
-                if (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD)
+                else
                 {
-                    // check if buffer is in the map
-                    // if it is, get a list of previously mapped ranges
-                    if (g_umapDiscardResources.count(this))
-                    {
-                        bool overlapsWithPreviouslyMappedRanges = false;
-
-                        UINT currentRangeX1 = lockRange.Range.Offset;
-                        UINT currentRangeX2 = lockRange.Range.Offset + lockRange.Range.Size;
-
-                        auto mappedRanges = g_umapDiscardResources[this];
-                        // compare current range with previously mapped ranges
-                        for (const auto& mappedRange : mappedRanges)
-                        {
-                            UINT mappedRangeX1 = mappedRange.Range.Offset;
-                            UINT mappedRangeX2 = mappedRange.Range.Offset + mappedRange.Range.Size;
-
-                            if (((currentRangeX1 >= mappedRangeX1) && (currentRangeX1 < mappedRangeX2)) ||
-                                ((currentRangeX2 >= mappedRangeX1) && (currentRangeX2 < mappedRangeX2)))
-                            {
-                                overlapsWithPreviouslyMappedRanges = true;
-                                break;
-                            }
-                        }
-
-                        // if the newly mapped range doesn't intersect previously mapped ranges - add it to the list and change flag to NO_OVERWRITE
-                        if (!overlapsWithPreviouslyMappedRanges)
-                        {
-                            mapType = D3D12TranslationLayer::MAP_TYPE_WRITE_NOOVERWRITE;
-                        }
-                        else // else clear the list of ranges, add the current range, and keep the DISCARD flag
-                        {
-                            g_umapDiscardResources[this].clear();
-                        }
-                    }
                     g_umapDiscardResources[this].push_back(lockRange);
                 }
             }
