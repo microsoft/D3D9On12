@@ -639,7 +639,7 @@ namespace D3D9on12
         memset(&m_TranslationLayerCreateArgs, 0, sizeof(m_TranslationLayerCreateArgs));
     }
 
-    std::unordered_map<Resource*, std::vector<LockRange>> g_umapDiscardResources;
+    std::unordered_map<Resource*, std::vector<LockRange>> g_lockedResourceRanges;
 
     Resource::~Resource()
     {
@@ -693,7 +693,7 @@ namespace D3D9on12
             }
         }
 
-        g_umapDiscardResources.erase(this);
+        g_lockedResourceRanges.erase(this);
 
         m_pResource.reset(nullptr);
     }
@@ -1392,39 +1392,40 @@ namespace D3D9on12
             {
                 // Check if buffer is in the map
                 // If it is, get a list of previously mapped ranges
-                if (g_umapDiscardResources.count(this))
+                if (g_lockedResourceRanges.count(this))
                 {
                     bool overlapsWithPreviouslyMappedRanges = false;
                     bool mergedWithExistingMappedRange = false;
 
-                    UINT currentRangeX1 = lockRange.Range.Offset;
-                    UINT currentRangeX2 = lockRange.Range.Offset + lockRange.Range.Size;
+                    UINT currentRangeStart = lockRange.Range.Offset;
+                    UINT currentRangeEnd = lockRange.Range.Offset + lockRange.Range.Size;
 
-                    auto mappedRanges = g_umapDiscardResources[this];
+                    auto mappedRanges = g_lockedResourceRanges[this];
                     // Compare current range with previously mapped ranges
                     for (auto& mappedRange : mappedRanges)
                     {
-                        UINT mappedRangeX1 = mappedRange.Range.Offset;
-                        UINT mappedRangeX2 = mappedRange.Range.Offset + mappedRange.Range.Size;
+                        UINT mappedRangeStart = mappedRange.Range.Offset;
+                        UINT mappedRangeEnd = mappedRange.Range.Offset + mappedRange.Range.Size;
 
-                        if (((currentRangeX1 >= mappedRangeX1) && (currentRangeX1 < mappedRangeX2)) ||
-                            ((currentRangeX2 >= mappedRangeX1) && (currentRangeX2 < mappedRangeX2)))
+                        if (((currentRangeStart >= mappedRangeStart) && (currentRangeStart < mappedRangeEnd)) ||
+                            ((currentRangeEnd >= mappedRangeStart) && (currentRangeEnd < mappedRangeEnd)))
                         {
                             overlapsWithPreviouslyMappedRanges = true;
                             break;
                         }
 
                         // If the current range is a neighbor of an existing mapped range, merge it with the neighbor
-                        if (mappedRangeX2 == currentRangeX1)
+                        if (currentRangeStart == mappedRangeEnd)
                         {
                             mappedRange.Range.Size += lockRange.Range.Size;
 
                             mergedWithExistingMappedRange = true;
                             break;
                         }
-                        if (mappedRangeX1 == currentRangeX2)
+                        if (currentRangeEnd == mappedRangeStart)
                         {
                             mappedRange.Range.Offset = lockRange.Range.Offset;
+                            mappedRange.Range.Size += lockRange.Range.Size;
 
                             mergedWithExistingMappedRange = true;
                             break;
@@ -1438,17 +1439,17 @@ namespace D3D9on12
                     }
                     else // Else clear the list of ranges, add the current range, and keep the DISCARD flag
                     {
-                        g_umapDiscardResources[this].clear();
+                        g_lockedResourceRanges[this].clear();
                     }
 
                     if (!mergedWithExistingMappedRange)
                     {
-                        g_umapDiscardResources[this].push_back(lockRange);
+                        g_lockedResourceRanges[this].push_back(lockRange);
                     }
                 }
                 else
                 {
-                    g_umapDiscardResources[this].push_back(lockRange);
+                    g_lockedResourceRanges[this].push_back(lockRange);
                 }
             }
         }
