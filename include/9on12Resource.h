@@ -422,6 +422,4 @@ namespace D3D9on12
             _D3DDDIARG_CREATERESOURCE2 m_createArg;
         };
     };
-
-    extern std::unordered_map<Resource*, std::vector<LockRange>> g_lockedResourceRanges;
 };

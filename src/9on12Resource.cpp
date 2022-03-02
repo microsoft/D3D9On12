@@ -639,8 +639,6 @@ namespace D3D9on12
         memset(&m_TranslationLayerCreateArgs, 0, sizeof(m_TranslationLayerCreateArgs));
     }
 
-    std::unordered_map<Resource*, std::vector<LockRange>> g_lockedResourceRanges;
-
     Resource::~Resource()
     {
         if (m_pBackingShaderResource)
@@ -693,7 +691,7 @@ namespace D3D9on12
             }
         }
 
-        g_lockedResourceRanges.erase(this);
+        m_pParentDevice->m_lockedResourceRanges.erase(this);
 
         m_pResource.reset(nullptr);
     }
@@ -1392,7 +1390,7 @@ namespace D3D9on12
             {
                 // Check if buffer is in the map
                 // If it is, get a list of previously mapped ranges
-                if (g_lockedResourceRanges.count(this))
+                if (device.m_lockedResourceRanges.count(this))
                 {
                     bool overlapsWithPreviouslyMappedRanges = false;
                     bool mergedWithExistingMappedRange = false;
@@ -1400,7 +1398,7 @@ namespace D3D9on12
                     UINT currentRangeStart = lockRange.Range.Offset;
                     UINT currentRangeEnd = lockRange.Range.Offset + lockRange.Range.Size;
 
-                    auto mappedRanges = g_lockedResourceRanges[this];
+                    auto &mappedRanges = device.m_lockedResourceRanges[this];
                     // Compare current range with previously mapped ranges
                     for (auto& mappedRange : mappedRanges)
                     {
@@ -1439,17 +1437,17 @@ namespace D3D9on12
                     }
                     else // Else clear the list of ranges, add the current range, and keep the DISCARD flag
                     {
-                        g_lockedResourceRanges[this].clear();
+                        device.m_lockedResourceRanges[this].clear();
                     }
 
                     if (!mergedWithExistingMappedRange)
                     {
-                        g_lockedResourceRanges[this].push_back(lockRange);
+                        device.m_lockedResourceRanges[this].push_back(lockRange);
                     }
                 }
                 else
                 {
-                    g_lockedResourceRanges[this].push_back(lockRange);
+                    device.m_lockedResourceRanges[this].push_back(lockRange);
                 }
             }
         }
