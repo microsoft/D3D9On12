@@ -107,7 +107,7 @@ namespace D3D9on12
         ShaderDedupe<VertexShader> m_VSDedupe;
         ShaderDedupe<PixelShader> m_PSDedupe;
 
-        std::unordered_map<Resource*, std::vector<LockRange>> m_lockedResourceRanges;
+        D3D12TranslationLayer::COptLockedContainer<std::unordered_map<Resource*, std::vector<LockRange>>> m_lockedResourceRanges;
 
     protected:
         virtual void LogCreateVideoDevice( HRESULT hr );

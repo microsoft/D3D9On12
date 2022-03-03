@@ -1388,9 +1388,11 @@ namespace D3D9on12
         {
             if (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD)
             {
+                auto lockedResourceRanges = device.m_lockedResourceRanges.GetLocked();
+
                 // Check if buffer is in the map
                 // If it is, get a list of previously mapped ranges
-                if (device.m_lockedResourceRanges.count(this))
+                if (lockedResourceRanges->count(this))
                 {
                     bool overlapsWithPreviouslyMappedRanges = false;
                     bool mergedWithExistingMappedRange = false;
@@ -1398,7 +1400,7 @@ namespace D3D9on12
                     UINT currentRangeStart = lockRange.Range.Offset;
                     UINT currentRangeEnd = lockRange.Range.Offset + lockRange.Range.Size;
 
-                    auto &mappedRanges = device.m_lockedResourceRanges[this];
+                    auto &mappedRanges = lockedResourceRanges->at(this);
                     // Compare current range with previously mapped ranges
                     for (auto& mappedRange : mappedRanges)
                     {
@@ -1437,17 +1439,18 @@ namespace D3D9on12
                     }
                     else // Else clear the list of ranges, add the current range, and keep the DISCARD flag
                     {
-                        device.m_lockedResourceRanges[this].clear();
+                        lockedResourceRanges->at(this).clear();
                     }
 
                     if (!mergedWithExistingMappedRange)
                     {
-                        device.m_lockedResourceRanges[this].push_back(lockRange);
+                        lockedResourceRanges->at(this).push_back(lockRange);
                     }
                 }
                 else
                 {
-                    device.m_lockedResourceRanges[this].push_back(lockRange);
+                    std::vector<LockRange> lockedRange = { lockRange };
+                    lockedResourceRanges->insert({ this, lockedRange });
                 }
             }
         }

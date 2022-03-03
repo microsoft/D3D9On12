@@ -61,7 +61,7 @@ namespace D3D9on12
 
             auto ret = swapChainHelper.StandardPresent( GetContext(), pKMTArgs, *pSrcTranslationLayerResource );
 
-            m_lockedResourceRanges.clear();
+            m_lockedResourceRanges.GetLocked()->clear();
 
             return ret;
         }

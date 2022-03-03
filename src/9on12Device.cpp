@@ -411,6 +411,11 @@ namespace D3D9on12
 
             args.MaxSRVHeapSize = min(RegistryConstants::g_cMaxSRVHeapSize, g_AppCompatInfo.MaxSRVHeapSize);
 
+            if (!RegistryConstants::g_cSingleThread)
+            {
+                m_lockedResourceRanges.InitLock();
+            }
+            
             m_pImmediateContext.emplace(
                 0,
                 FeatureDataD3D12,
