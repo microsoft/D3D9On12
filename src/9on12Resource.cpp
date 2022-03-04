@@ -691,6 +691,8 @@ namespace D3D9on12
             }
         }
 
+        m_pParentDevice->m_lockedResourceRanges.GetLocked()->erase(this);
+
         m_pResource.reset(nullptr);
     }
 
@@ -1381,7 +1383,78 @@ namespace D3D9on12
         }
 
         mapType = GetMapTypeFlag(flags.ReadOnly, flags.WriteOnly, flags.Discard, flags.NoOverwrite, m_isDecodeCompressedBuffer, m_pResource->AppDesc()->CPUAccessFlags());
-        
+
+        if (RegistryConstants::g_cLockDiscardOptimization)
+        {
+            if (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD)
+            {
+                auto lockedResourceRanges = device.m_lockedResourceRanges.GetLocked();
+
+                // Check if buffer is in the map
+                // If it is, get a list of previously mapped ranges
+                if (lockedResourceRanges->count(this))
+                {
+                    bool overlapsWithPreviouslyMappedRanges = false;
+                    bool mergedWithExistingMappedRange = false;
+
+                    UINT currentRangeStart = lockRange.Range.Offset;
+                    UINT currentRangeEnd = lockRange.Range.Offset + lockRange.Range.Size;
+
+                    auto &mappedRanges = lockedResourceRanges->at(this);
+                    // Compare current range with previously mapped ranges
+                    for (auto& mappedRange : mappedRanges)
+                    {
+                        UINT mappedRangeStart = mappedRange.Range.Offset;
+                        UINT mappedRangeEnd = mappedRange.Range.Offset + mappedRange.Range.Size;
+
+                        if (((currentRangeStart >= mappedRangeStart) && (currentRangeStart < mappedRangeEnd)) ||
+                            ((currentRangeEnd >= mappedRangeStart) && (currentRangeEnd < mappedRangeEnd)))
+                        {
+                            overlapsWithPreviouslyMappedRanges = true;
+                            break;
+                        }
+
+                        // If the current range is a neighbor of an existing mapped range, merge it with the neighbor
+                        if (currentRangeStart == mappedRangeEnd)
+                        {
+                            mappedRange.Range.Size += lockRange.Range.Size;
+
+                            mergedWithExistingMappedRange = true;
+                            break;
+                        }
+                        if (currentRangeEnd == mappedRangeStart)
+                        {
+                            mappedRange.Range.Offset = lockRange.Range.Offset;
+                            mappedRange.Range.Size += lockRange.Range.Size;
+
+                            mergedWithExistingMappedRange = true;
+                            break;
+                        }
+                    }
+
+                    // If the newly mapped range doesn't intersect previously mapped ranges - add it to the list and change flag to NO_OVERWRITE
+                    if (!overlapsWithPreviouslyMappedRanges)
+                    {
+                        mapType = D3D12TranslationLayer::MAP_TYPE_WRITE_NOOVERWRITE;
+                    }
+                    else // Else clear the list of ranges, add the current range, and keep the DISCARD flag
+                    {
+                        lockedResourceRanges->at(this).clear();
+                    }
+
+                    if (!mergedWithExistingMappedRange)
+                    {
+                        lockedResourceRanges->at(this).push_back(lockRange);
+                    }
+                }
+                else
+                {
+                    std::vector<LockRange> lockedRange = { lockRange };
+                    lockedResourceRanges->insert({ this, lockedRange });
+                }
+            }
+        }
+
         if (bAsyncLock)
         {
             CD3DX12_RANGE ReadRange(0, 0);

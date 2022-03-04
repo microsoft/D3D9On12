@@ -59,7 +59,11 @@ namespace D3D9on12
             auto swapChainHelper = D3D12TranslationLayer::SwapChainHelper( pSwapChain );
             m_SwapChainManager->WaitForMaximumFrameLatency();
 
-            return swapChainHelper.StandardPresent( GetContext(), pKMTArgs, *pSrcTranslationLayerResource );
+            auto ret = swapChainHelper.StandardPresent( GetContext(), pKMTArgs, *pSrcTranslationLayerResource );
+
+            m_lockedResourceRanges.GetLocked()->clear();
+
+            return ret;
         }
         else
         {
