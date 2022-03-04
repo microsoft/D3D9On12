@@ -691,7 +691,7 @@ namespace D3D9on12
             }
         }
 
-        m_pParentDevice->m_lockedResourceRanges.erase(this);
+        m_pParentDevice->m_lockedResourceRanges.GetLocked()->erase(this);
 
         m_pResource.reset(nullptr);
     }
