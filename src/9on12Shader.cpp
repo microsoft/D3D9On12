@@ -585,6 +585,9 @@ namespace D3D9on12
     HRESULT Shader::GenerateFinalD3D12Shader(SizedBuffer& upgradedByteCode, _Out_ D3D12Shader& d3d12ShaderOut, SizedBuffer& inputSignature, SizedBuffer& outputSignature)
     {
         HRESULT hr = S_OK;
+        Check9on12(inputSignature.m_size % 4 == 0);
+        Check9on12(outputSignature.m_size % 4 == 0);
+        Check9on12(upgradedByteCode.m_size % 4 == 0);
 
         // Input Signature
         {
@@ -745,7 +748,13 @@ namespace D3D9on12
         }
 
         m_dataSize = sizeof(D3D10_INTERNALSHADER_SIGNATURE) + sizeof(_D3D11_INTERNALSHADER_PARAMETER_11_1) * numParameters + charCacheSize;
-        m_pData = std::unique_ptr<byte[]>(new byte[m_dataSize]);
+        UINT padding = 0;
+        if (m_dataSize % 4 != 0)
+        {
+            // DXBC needs to be 4 byte aligned for dxilconv
+            padding = 4 - m_dataSize % 4;
+        }
+        m_pData = std::unique_ptr<byte[]>(new byte[m_dataSize+padding]);
         if (m_pData.get() == nullptr)
         {
             return E_OUTOFMEMORY;
@@ -772,6 +781,11 @@ namespace D3D9on12
                 pParameters[i].SemanticName = (UINT)((BYTE *)pCharCache - (BYTE *)pHeader);
                 pCharCache += strlen(pSemanticName) + 1;
             }
+        }
+        if (padding > 0)
+        {
+            ZeroMemory(m_pData.get() + m_dataSize, padding);
+            m_dataSize += padding;
         }
 
         return S_OK;

@@ -194,10 +194,21 @@ HRESULT ShaderConverterAPI::ConvertShader(ConvertShaderArgs& args)
 
         if (SUCCEEDED(hr) && pBlob)
         {
+            // DXBC needs to be 4 byte aligned for dxilconv
+            UINT padding = 0;
+            UINT bufferSizeMod4 = pBlob->GetBufferSize() % 4;
+            if (bufferSizeMod4 != 0)
+            {
+                padding = 4 - bufferSizeMod4;
+            }
             hr = AllocTemporarySpace(args.convertedByteCode, pBlob->GetBufferSize());
             if (SUCCEEDED(hr))
             {
                 memcpy(args.convertedByteCode.m_pByteCode, pBlob->GetBufferPointer(), pBlob->GetBufferSize());
+                if (padding > 0)
+                {
+                    ZeroMemory((BYTE*)args.convertedByteCode.m_pByteCode + pBlob->GetBufferSize(), padding);
+                }
             }
             else
             {
@@ -227,11 +238,22 @@ HRESULT ShaderConverterAPI::CreateGeometryShader(CreateGeometryShaderArgs& args)
 
     if (SUCCEEDED(hr))
     {
+        // DXBC needs to be 4 byte aligned for dxilconv
+        UINT padding = 0;
+        UINT bufferSizeMod4 = pCodeBlob->GetBufferSize() % 4;
+        if (bufferSizeMod4 != 0)
+        {
+            padding = 4 - bufferSizeMod4;
+        }
         hr = AllocTemporarySpace(args.m_GSByteCode, pCodeBlob->GetBufferSize());
 
         if (SUCCEEDED(hr))
         {
             memcpy(args.m_GSByteCode.m_pByteCode, pCodeBlob->GetBufferPointer(), pCodeBlob->GetBufferSize());
+            if (padding > 0)
+            {
+                ZeroMemory((BYTE*)args.m_GSByteCode.m_pByteCode + pCodeBlob->GetBufferSize(), padding);
+            }
             *args.m_pGsOutputDecls = geoDesc.GetOutputDecls();
         }
         else
