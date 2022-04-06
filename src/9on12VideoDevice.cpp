@@ -313,6 +313,28 @@ namespace D3D9on12
                 DXVADDI_QUERYPROCAMPINPUT *pInput = (DXVADDI_QUERYPROCAMPINPUT *)pGetCaps->pInfo;
                 DXVADDI_VALUERANGE *pValue = (DXVADDI_VALUERANGE *)pGetCaps->pData;
                 UINT filter = FilterId(pInput->ProcAmpCap);
+
+                // Conversion between D3D12 to DXVA Multiplier/StepSize semantics.
+                // Need to de-normalize the d3d12 range expressed as an expanded scaled range with unitary integer steps to the DXVA expressed as an absolute range with the fractional step.
+                    // D3D12 semantics
+                    // https://docs.microsoft.com/zh-cn/windows-hardware/drivers/ddi/d3d12umddi/ns-d3d12umddi-d3d12ddi_video_process_filter_range_0020
+                    // The multiplier enables the filter range to have a fractional step value. For example, a hue filter might have an actual range of [–180.0 ... +180.0] with a step size of 0.25. 
+                    // The device would report the following range and multiplier:
+                    // Minimum: –720
+                    // Maximum : +720
+                    // Multiplier : 0.25
+                    // In this case, a filter value of 2 would be interpreted by the device as 0.50, which is 2 × 0.25.
+                    // The device should use a multiplier that can be represented exactly as a base - 2 fraction.
+                    //
+                    // DXVA semantics
+                    // https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dumddi/ns-d3dumddi-_dxvaddi_valuerange
+                    // The range is expressed in absolute terms in Minimum, Maximum, Default. The allowed precision step between that range is defined in StepSize.
+                    // For example, a hue filter might have an actual range of [–180.0 ... +180.0] with a step size of 0.25. 
+                    // The device would report the following range and multiplier:
+                    // Minimum: –180
+                    // Maximum : +180
+                    // StepSize : 0.25
+
                 pValue->MinValue = VideoTranslate::ToFixed32<INT>(static_cast<INT>(floor(m_filterRanges[filter].Minimum * m_filterRanges[filter].Multiplier)));
                 pValue->MaxValue = VideoTranslate::ToFixed32<INT>(static_cast<INT>(floor(m_filterRanges[filter].Maximum * m_filterRanges[filter].Multiplier)));
                 pValue->DefaultValue = VideoTranslate::ToFixed32<INT>(static_cast<INT>(floor(m_filterRanges[filter].Default * m_filterRanges[filter].Multiplier)));
