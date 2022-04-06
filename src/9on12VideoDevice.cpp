@@ -313,9 +313,9 @@ namespace D3D9on12
                 DXVADDI_QUERYPROCAMPINPUT *pInput = (DXVADDI_QUERYPROCAMPINPUT *)pGetCaps->pInfo;
                 DXVADDI_VALUERANGE *pValue = (DXVADDI_VALUERANGE *)pGetCaps->pData;
                 UINT filter = FilterId(pInput->ProcAmpCap);
-                pValue->MinValue = VideoTranslate::ToFixed32<INT>(m_filterRanges[filter].Minimum);
-                pValue->MaxValue = VideoTranslate::ToFixed32<INT>(m_filterRanges[filter].Maximum);
-                pValue->DefaultValue = VideoTranslate::ToFixed32<INT>(m_filterRanges[filter].Default);
+                pValue->MinValue = VideoTranslate::ToFixed32<INT>(static_cast<INT>(floor(m_filterRanges[filter].Minimum * m_filterRanges[filter].Multiplier)));
+                pValue->MaxValue = VideoTranslate::ToFixed32<INT>(static_cast<INT>(floor(m_filterRanges[filter].Maximum * m_filterRanges[filter].Multiplier)));
+                pValue->DefaultValue = VideoTranslate::ToFixed32<INT>(static_cast<INT>(floor(m_filterRanges[filter].Default * m_filterRanges[filter].Multiplier)));
                 pValue->StepSize = VideoTranslate::ToFixed32<FLOAT>(m_filterRanges[filter].Multiplier);
             }
             break;

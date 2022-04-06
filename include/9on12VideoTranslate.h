@@ -501,30 +501,9 @@ namespace D3D9on12
                 assert(filter < cFilterRanges);
                 if (newMask & 0x1)
                 {
-                    // Conversion between D3D12 to DXVA Multiplier/StepSize semantics.
-                    // Need to de-normalize the d3d12 range expressed as an expanded scaled range with unitary integer steps to the DXVA expressed as an absolute range with the fractional step.
-                        // D3D12 semantics
-                        // https://docs.microsoft.com/zh-cn/windows-hardware/drivers/ddi/d3d12umddi/ns-d3d12umddi-d3d12ddi_video_process_filter_range_0020
-                        // The multiplier enables the filter range to have a fractional step value. For example, a hue filter might have an actual range of [–180.0 ... +180.0] with a step size of 0.25. 
-                        // The device would report the following range and multiplier:
-                        // Minimum: –720
-                        // Maximum : +720
-                        // Multiplier : 0.25
-                        // In this case, a filter value of 2 would be interpreted by the device as 0.50, which is 2 × 0.25.
-                        // The device should use a multiplier that can be represented exactly as a base - 2 fraction.
-                        //
-                        // DXVA semantics
-                        // https://docs.microsoft.com/en-us/windows-hardware/drivers/ddi/d3dumddi/ns-d3dumddi-_dxvaddi_valuerange
-                        // The range is expressed in absolute terms in Minimum, Maximum, Default. The allowed precision step between that range is defined in StepSize.
-                        // For example, a hue filter might have an actual range of [–180.0 ... +180.0] with a step size of 0.25. 
-                        // The device would report the following range and multiplier:
-                        // Minimum: –180
-                        // Maximum : +180
-                        // StepSize : 0.25
-
-                    pFilterRanges[filter].Minimum = static_cast<INT>(floor(dx12Support.FilterRangeSupport[filter].Minimum * dx12Support.FilterRangeSupport[filter].Multiplier));
-                    pFilterRanges[filter].Maximum = static_cast<INT>(floor(dx12Support.FilterRangeSupport[filter].Maximum * dx12Support.FilterRangeSupport[filter].Multiplier));
-                    pFilterRanges[filter].Default = static_cast<INT>(floor(dx12Support.FilterRangeSupport[filter].Default * dx12Support.FilterRangeSupport[filter].Multiplier));
+                    pFilterRanges[filter].Minimum = dx12Support.FilterRangeSupport[filter].Minimum;
+                    pFilterRanges[filter].Maximum = dx12Support.FilterRangeSupport[filter].Maximum;
+                    pFilterRanges[filter].Default = dx12Support.FilterRangeSupport[filter].Default;
                     pFilterRanges[filter].Multiplier = dx12Support.FilterRangeSupport[filter].Multiplier;
                 }
                 newMask >>= 1;
