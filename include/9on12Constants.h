@@ -207,6 +207,7 @@ namespace D3D9on12
 
         static void BindToPipeline(Device& device, ConstantBufferBinding& buffer, D3D12TranslationLayer::EShaderStage shaderStage);
 
+        static const size_t g_cMaxConstantBufferSize = 256 * sizeof(float);
     private:
 
         Device &m_device;
@@ -214,7 +215,6 @@ namespace D3D9on12
         GeometryShaderConstants m_geometryShaderData;
         PixelShaderConstants m_pixelShaderData;
 
-        static const size_t g_cMaxConstantBufferSize = 256 * sizeof(float);
         ConstantBufferBinding m_nullCB;
     };
 
