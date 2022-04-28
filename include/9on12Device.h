@@ -90,8 +90,8 @@ namespace D3D9on12
         {
             const UINT CONSTANT_BUFFER_ELEMENT_SIZE = sizeof(FLOAT) * 4;
             UINT firstConstant = offsetInBytes / CONSTANT_BUFFER_ELEMENT_SIZE;
-            UINT maxConstantBufferElements = ConstantsManager::g_cMaxConstantBufferSize / sizeof(FLOAT);
-            GetContext().SetConstantBuffers<ShaderStage>(shaderRegister, 1, &pResource, &firstConstant, (UINT *)&maxConstantBufferElements);
+            UINT maxConstantBufferElements = ConstantsManager::g_cMaxConstantBufferSize / CONSTANT_BUFFER_ELEMENT_SIZE;
+            GetContext().SetConstantBuffers<ShaderStage>(shaderRegister, 1, &pResource, &firstConstant, &maxConstantBufferElements);
         }
 
         void EnsureVideoDevice();
