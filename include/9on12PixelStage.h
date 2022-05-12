@@ -32,6 +32,7 @@ namespace D3D9on12
         void SetBlendState(Device& device, DWORD dwState, DWORD dwValue);
         void SetPSExtensionState(DWORD dwState, DWORD dwValue);
         void SetPSExtension2State(DWORD dwStage, DWORD dwState, DWORD dwValue);
+        void SetPreTransformedVertexMode(bool drawingPretransformedVerts);
 
         HRESULT ResolveDeferredState(Device &device, D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, UINT& textureDirtyMaskToKeep);
 

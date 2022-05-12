@@ -64,6 +64,7 @@ namespace D3D9on12
             RETURN_E_INVALIDARG_AND_CHECK();
         }
 
+        pDevice->SetDrawingPreTransformedVerts(false);
         OffsetArg baseVertexOffset = OffsetArg::AsOffsetInVertices(pDrawPrimitiveArg->VStart);
         OffsetArg baseIndexOffset = OffsetArg::AsOffsetInIndices(0);
 
@@ -117,6 +118,7 @@ namespace D3D9on12
         UINT const stream0Stride = pDevice->GetPipelineState().GetInputAssembly().GetStream0Stride();
         Check9on12(stream0Stride > 0);
 
+        pDevice->SetDrawingPreTransformedVerts(true);
         OffsetArg baseVertexOffset = OffsetArg::AsOffsetInBytes(pDrawPrimitiveArg->FirstVertexOffset);
         OffsetArg baseIndexOffset = OffsetArg::AsOffsetInIndices(0);
 
@@ -166,6 +168,7 @@ namespace D3D9on12
         UINT const stream0Stride = pDevice->GetPipelineState().GetInputAssembly().GetStream0Stride();
         Check9on12(stream0Stride > 0);
 
+        pDevice->SetDrawingPreTransformedVerts(true);
         bool bNegativeVertexOffset = pData->BaseVertexOffset < 0;
         OffsetArg baseVertexOffset = OffsetArg::AsOffsetInBytes(pData->BaseVertexOffset);
         OffsetArg drawOffset = OffsetArg::AsOffsetInVertices(0);
@@ -468,6 +471,7 @@ namespace D3D9on12
         UINT StartInstanceLocation = 0;
         const UINT vertexCount = pDrawPrimitiveArg->MinIndex + pDrawPrimitiveArg->NumVertices;
 
+        pDevice->SetDrawingPreTransformedVerts(false);
         OffsetArg baseIndexOffset = OffsetArg::AsOffsetInIndices(pDrawPrimitiveArg->StartIndex);
         OffsetArg baseVertexOffset = OffsetArg::AsOffsetInVertices(pDrawPrimitiveArg->BaseVertexIndex);
 
