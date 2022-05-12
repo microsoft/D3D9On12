@@ -109,6 +109,7 @@ namespace D3D9on12
         ShaderDedupe<PixelShader> m_PSDedupe;
 
         D3D12TranslationLayer::COptLockedContainer<std::unordered_map<Resource*, std::vector<LockRange>>> m_lockedResourceRanges;
+        void SetDrawingPreTransformedVerts(bool preTransformedVerts);
 
     protected:
         virtual void LogCreateVideoDevice( HRESULT hr );
@@ -160,5 +161,7 @@ namespace D3D9on12
 
         BYTE m_pVideoDeviceSpace[sizeof(VideoDevice)];
         VideoDevice *m_pVideoDevice;
+
+        bool m_drawingPreTransformedVerts = false;
     };
 };

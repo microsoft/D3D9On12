@@ -634,6 +634,15 @@ namespace D3D9on12
         }
     }
 
+    void PixelStage::SetPreTransformedVertexMode(bool drawingPretransformedVerts)
+    {
+        if (static_cast<UINT>(drawingPretransformedVerts) != m_rasterizerStateID.DrawingPreTransformedVertices)
+        {
+            m_rasterizerStateID.DrawingPreTransformedVertices = drawingPretransformedVerts;
+            m_dirtyFlags.RasterizerState = true;
+        }
+    }
+
     void PixelStage::ResolveRenderTargets(Device &device, D3D12_GRAPHICS_PIPELINE_STATE_DESC& psoDesc, bool bDSVBound)
     {
         psoDesc.NumRenderTargets = m_numBoundRenderTargets;

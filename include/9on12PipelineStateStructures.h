@@ -88,6 +88,7 @@ namespace D3D9on12
                 UINT MultiSampleAntiAlias : 1;
                 UINT AntialiasedLineEnable : 1;
                 UINT DepthClipEnable : 1;
+                UINT DrawingPreTransformedVertices : 1;
             };
         };
         FLOAT DepthBias;
@@ -333,7 +334,15 @@ namespace D3D9on12
             }
         }
         rasterizerDesc.DepthBiasClamp = 0.0f;
-        rasterizerDesc.DepthClipEnable = rasterizerID.DepthClipEnable ? TRUE : FALSE;
+
+        if (rasterizerID.DrawingPreTransformedVertices && !bDepthEnabledAndBound)
+        {
+            rasterizerDesc.DepthClipEnable = false;
+        }
+        else
+        {
+            rasterizerDesc.DepthClipEnable = rasterizerID.DepthClipEnable ? TRUE : FALSE;
+        }
 
         rasterizerDesc.AntialiasedLineEnable = rasterizerID.AntialiasedLineEnable ? TRUE : FALSE;
 

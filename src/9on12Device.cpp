@@ -544,4 +544,12 @@ namespace D3D9on12
         //Do nothing
         UNREFERENCED_PARAMETER( hr );
     }
+
+    void Device::SetDrawingPreTransformedVerts(bool preTransformedVerts)
+    {
+        if (preTransformedVerts != m_drawingPreTransformedVerts)
+        {
+            GetPipelineState().GetPixelStage().SetPreTransformedVertexMode(preTransformedVerts);
+        }
+    }
 };
