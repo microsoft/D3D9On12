@@ -348,7 +348,7 @@ namespace D3D9on12
     {
         D3D9on12_DDI_ENTRYPOINT_START(TRUE);
         Device* pDevice = Device::GetDeviceFromHandle(hDevice);
-        pDevice->GetSwapChainManager()->SetMaximumFrameLatency( MaxFrameLatency );
+        pDevice->GetContext().m_MaxFrameLatencyHelper.SetMaximumFrameLatency(MaxFrameLatency);
         D3D9on12_DDI_ENTRYPOINT_END_AND_REPORT_HR(hDevice, S_OK);
     }
 
@@ -357,7 +357,7 @@ namespace D3D9on12
         BOOL result = FALSE;
         D3D9on12_DDI_ENTRYPOINT_START(TRUE);
         Device* pDevice = Device::GetDeviceFromHandle(hDevice);
-        result = pDevice->GetSwapChainManager()->IsMaximumFrameLatencyReached();
+        result = pDevice->GetContext().m_MaxFrameLatencyHelper.IsMaximumFrameLatencyReached();
         D3D9on12_DDI_ENTRYPOINT_END_AND_REPORT_HR(hDevice, S_OK);
         return result;
     }
