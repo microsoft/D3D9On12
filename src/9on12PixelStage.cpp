@@ -885,10 +885,19 @@ namespace D3D9on12
                     D3D12TranslationLayer::SRV* pSRV = nullptr;
                     Resource* pResource = m_shaderResources[i];
                     if (pResource)
-                    {
+                    {   
                         // Certain apps expect the driver to automatically unbind resources as SRVs when they are bound as RTVs
                         // Examples inclue Alan Wake and Valkyrie Chronicles
                         bool HideSRV = pResource->GetDSVBindingTracker().IsBound() && GetDepthStencilStateID().ZWriteEnable;
+
+                        // resources with INTZ surface format, set ZWriteEnable to false instead of hiding SRV
+                        if (HideSRV && (pResource->GetD3DFormat() == D3DFMT_INTZ))
+                        {
+                            HideSRV = false;
+                            SetDepthStencilState(device, D3DRS_ZWRITEENABLE, 0);
+                            device.GetPipelineState().SetIntzRestoreZWrite(true);
+                        }
+
                         if (!HideSRV && pResource->GetRTVBindingTracker().IsBound())
                         {
                             HideSRV = true;

@@ -408,7 +408,8 @@ namespace D3D9on12
         m_inputAssembly(m_dirtyFlags, m_rasterStates),
         m_vertexStage(device, m_dirtyFlags, m_rasterStates),
         m_pixelStage(m_dirtyFlags, m_rasterStates),
-        m_bNeedsPipelineState(false)
+        m_bNeedsPipelineState(false),
+        m_intzRestoreZWrite(false)
     {
         memset(&m_PSODesc, 0, sizeof(m_PSODesc));
 
