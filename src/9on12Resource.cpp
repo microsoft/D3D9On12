@@ -1386,7 +1386,7 @@ namespace D3D9on12
 
         if (RegistryConstants::g_cLockDiscardOptimization)
         {
-            if (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD)
+            if (flags.RangeValid && (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD))
             {
                 auto lockedResourceRanges = device.m_lockedResourceRanges.GetLocked();
 
