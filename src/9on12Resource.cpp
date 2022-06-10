@@ -1386,8 +1386,16 @@ namespace D3D9on12
 
         if (RegistryConstants::g_cLockDiscardOptimization)
         {
-            if (flags.RangeValid && (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD))
+            if (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD)
             {
+                // Range not valid means the whole resource is mapped
+                if(!flags.RangeValid)
+                {
+                    lockRange.Range.Offset = 0;
+                    assert(this->m_totalSize <= UINT_MAX); // For casting below
+                    lockRange.Range.Size = (UINT) this->m_totalSize;
+                }
+
                 // Check if buffer is in the map
                 // If it is, get a list of previously mapped ranges
 
