@@ -27,6 +27,10 @@ namespace D3D9on12
         void MarkInputLayoutAsDirty() { m_dirtyFlags.InputLayout = true; }
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC& CurrentPSODesc() { return m_PSODesc; }
+
+        void SetIntzRestoreZWrite(BOOL value) { m_intzRestoreZWrite = value; }
+        BOOL GetIntzRestoreZWrite() { return m_intzRestoreZWrite; }
+
     private:
         PipelineStateDirtyFlags     m_dirtyFlags;
 
@@ -56,5 +60,7 @@ namespace D3D9on12
         };
 
         D3D12_GRAPHICS_PIPELINE_STATE_DESC m_PSODesc;
+        
+        BOOL m_intzRestoreZWrite;
     };
 };
