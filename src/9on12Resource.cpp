@@ -1388,21 +1388,31 @@ namespace D3D9on12
         {
             if (mapType == D3D12TranslationLayer::MAP_TYPE_WRITE_DISCARD)
             {
-                auto lockedResourceRanges = device.m_lockedResourceRanges.GetLocked();
+                // Range not valid means the whole resource is mapped
+                if(!flags.RangeValid)
+                {
+                    lockRange.Range.Offset = 0;
+                    assert(this->m_totalSize <= UINT_MAX); // For casting below
+                    lockRange.Range.Size = (UINT) this->m_totalSize;
+                }
 
                 // Check if buffer is in the map
                 // If it is, get a list of previously mapped ranges
-                if (lockedResourceRanges->count(this))
-                {
+
+                auto lockedResourceRanges = device.m_lockedResourceRanges.GetLocked();
+                auto it = lockedResourceRanges->find(this);
+                if (it != lockedResourceRanges->end()) {
+
+                    // it->second has the mapped ranges vector corresponding to it->first == this
+
                     bool overlapsWithPreviouslyMappedRanges = false;
                     bool mergedWithExistingMappedRange = false;
 
                     UINT currentRangeStart = lockRange.Range.Offset;
                     UINT currentRangeEnd = lockRange.Range.Offset + lockRange.Range.Size;
 
-                    auto &mappedRanges = lockedResourceRanges->at(this);
                     // Compare current range with previously mapped ranges
-                    for (auto& mappedRange : mappedRanges)
+                    for (auto& mappedRange : it->second)
                     {
                         UINT mappedRangeStart = mappedRange.Range.Offset;
                         UINT mappedRangeEnd = mappedRange.Range.Offset + mappedRange.Range.Size;
@@ -1439,12 +1449,12 @@ namespace D3D9on12
                     }
                     else // Else clear the list of ranges, add the current range, and keep the DISCARD flag
                     {
-                        lockedResourceRanges->at(this).clear();
+                        it->second.clear();
                     }
 
                     if (!mergedWithExistingMappedRange)
                     {
-                        lockedResourceRanges->at(this).push_back(lockRange);
+                        it->second.push_back(lockRange);
                     }
                 }
                 else
