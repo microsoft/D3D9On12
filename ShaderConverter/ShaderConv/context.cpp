@@ -2315,13 +2315,7 @@ CContext::Translate_TEX( const CInstr& instr )
         {
             if (TextureUsesHardwareShadowMapping(dwStage))
             {
-                //Not sure if they can do a hardware shadow map with bias..
-                //Emit Magenta error color: mov dest 1 0 1 1
-                Modifiers modifiers = Modifiers();
-                this->EmitDstInstruction( modifiers,
-                                          D3D10_SB_OPCODE_MOV,
-                                          dest,
-                                          COperand( 1.0f, 0.0f, 1.0f, 1.0f ) );
+                EmitSampleCmp(instr, dest, dwStage, maskedSrc0);
             }
             else 
             {
