@@ -520,6 +520,9 @@ protected:
                     switch (usage)
                     {
                     case D3DDECLUSAGE_COLOR:
+                        defaultValue = COperand(0.0f, 0.0f, 0.0f, 1.0f);
+                        break;
+
                     case D3DDECLUSAGE_PSIZE:
                         defaultValue = COperand(1.0f);
                         break;
