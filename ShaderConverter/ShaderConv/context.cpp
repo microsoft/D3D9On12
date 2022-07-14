@@ -1340,9 +1340,10 @@ CContext::Translate_ABS( const CInstr& instr )
 void
 CContext::Translate_NRM( const CInstr& instr )
 {
-    // dp3 s0.x, src0, src0
-    // rsq s0.x, s0.x
-    // mul dest, src0, s0.x
+    // dp3  s0.x, src0, src0
+    // rsq  s0.y, s0.x
+    // movc s0.z, s0.x, s0.y, vec4(FLT_MAX)
+    // mul  dest, src0, s0.z
 
     const COperandBase dest = instr.CreateDstOperand();
     const COperandBase src0 = this->EmitSrcOperand( instr, 0 );
@@ -1461,7 +1462,8 @@ CContext::Translate_DP2ADD( const CInstr& instr )
 void
 CContext::Translate_RCP( const CInstr& instr )
 {
-    // div dest, vec4(1.0f), src0
+    // div  dest, vec4(1.0f), src0
+    // movc dest, src0, dest, src0
 
     const COperandBase dest = instr.CreateDstOperand();
     const COperandBase src0 = this->EmitSrcOperand( instr, 0 );
