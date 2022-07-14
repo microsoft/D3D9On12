@@ -1355,14 +1355,21 @@ CContext::Translate_NRM( const CInstr& instr )
 
     m_pShaderAsm->EmitInstruction(
         CInstruction( D3D10_SB_OPCODE_RSQ,
-                      CTempOperandDst( SREG_TMP0, D3D10_SB_OPERAND_4_COMPONENT_MASK_X ),
+                      CTempOperandDst( SREG_TMP0, D3D10_SB_OPERAND_4_COMPONENT_MASK_Y ),
                       CTempOperand4( SREG_TMP0, __SWIZZLE_X ) ) );
+
+    m_pShaderAsm->EmitInstruction(
+        CInstruction(   D3D10_SB_OPCODE_MOVC,
+                        CTempOperandDst(SREG_TMP0, D3D10_SB_OPERAND_4_COMPONENT_MASK_Z),
+                        CTempOperand4(SREG_TMP0, __SWIZZLE_X),
+                        CTempOperand4(SREG_TMP0, __SWIZZLE_Y),
+                        COperand( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX ) ) );
 
     this->EmitDstInstruction( instr.GetModifiers(),
                               D3D10_SB_OPCODE_MUL,
                               dest,
                               src0,
-                              CTempOperand4( SREG_TMP0, __SWIZZLE_X ) );
+                              CTempOperand4( SREG_TMP0, __SWIZZLE_Z ) );
 }
 
 ///---------------------------------------------------------------------------
@@ -1463,6 +1470,13 @@ CContext::Translate_RCP( const CInstr& instr )
                               D3D10_SB_OPCODE_DIV,
                               dest,
                               COperand( 1.0f ),
+                              src0 );
+
+    this->EmitDstInstruction( instr.GetModifiers(),
+                              D3D10_SB_OPCODE_MOVC,
+                              dest,
+                              src0,
+                              dest,
                               src0 );
 }
 
