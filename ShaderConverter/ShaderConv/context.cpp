@@ -1463,7 +1463,7 @@ void
 CContext::Translate_RCP( const CInstr& instr )
 {
     // div  dest, vec4(1.0f), src0
-    // movc dest, src0, dest, src0
+    // movc dest, src0, dest, vec4(FLT_MAX)
 
     const COperandBase dest = instr.CreateDstOperand();
     const COperandBase src0 = this->EmitSrcOperand( instr, 0 );
@@ -1479,7 +1479,7 @@ CContext::Translate_RCP( const CInstr& instr )
                               dest,
                               src0,
                               dest,
-                              src0 );
+                              COperand( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX ) );
 }
 
 ///---------------------------------------------------------------------------
