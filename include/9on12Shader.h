@@ -291,7 +291,7 @@ namespace D3D9on12
         PixelShader(Device& parentDevice, _In_ CONST byte& byteCode, _In_ size_t byteCodeLength, WeakHash hash);
         ~PixelShader();
 
-        D3D12PixelShader& GetD3D12Shader(const ShaderConv::RasterStates &rasterStates, ShaderConv::VSOutputDecls& vsOutputDecls, D3D12Shader& inputShader);
+        D3D12PixelShader& GetD3D12Shader(ShaderConv::RasterStates rasterStates, const ShaderConv::VSOutputDecls& vsOutputDecls, D3D12Shader& inputShader);
 
     private:
 
