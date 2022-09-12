@@ -184,9 +184,34 @@ namespace D3D9on12
         ClearMap(m_derivedShaders);
     }
 
-    D3D12PixelShader& PixelShader::GetD3D12Shader(const ShaderConv::RasterStates &rasterStates, ShaderConv::VSOutputDecls& vsOutputDecls, D3D12Shader &inputShader)
+    D3D12PixelShader& PixelShader::GetD3D12Shader(ShaderConv::RasterStates rasterStates, const ShaderConv::VSOutputDecls& vsOutputDeclsOrig, D3D12Shader &inputShader)
     {
         HRESULT hr = S_OK;
+
+        // Check for changes to VS outputs that shouldn't lead to a new
+        // pixel shader generation
+        ShaderConv::VSOutputDecls vsOutputDecls;
+        const UINT numVsOutputs = vsOutputDeclsOrig.GetSize();
+        bool trimmedAnyOutputs = false;
+        for (UINT i = 0; i < numVsOutputs; ++i)
+        {
+            const auto& decl = vsOutputDeclsOrig[i];
+            bool skipOutput = false;
+            if (decl.Usage == D3DDECLUSAGE_CLIPDISTANCE && numVsOutputs == i + 1)
+            {
+                // Remove the ClipDistance SV if it's the last input
+                // This is added as an output for the VS stage to implement UserClipPlanes
+                // On CS:GO and some other titles, this state changes fairly frequently
+                // and causes redundant PS generation
+                skipOutput = true;
+                trimmedAnyOutputs = true;
+                rasterStates.UserClipPlanes = 0x0;
+            }
+            if (!skipOutput)
+            {
+                vsOutputDecls.AddDecl(vsOutputDeclsOrig[i]);
+            }
+        }
 
         DerivedPixelShaderKey key(rasterStates, vsOutputDecls);
 
@@ -223,7 +248,7 @@ namespace D3D9on12
             hr = m_parentDevice.m_ShaderConvAPI.ConvertShader(convertArgs);
             CHECK_HR(hr);
 
-            const bool bVSOutputMatchesPSInput = convertArgs.AddedSystemSemantics.size() == 0;
+            const bool bVSOutputMatchesPSInput = (convertArgs.AddedSystemSemantics.size() == 0 && !trimmedAnyOutputs);
             DXBCInputSignatureBuilder inputSignatureBuilder;
             SizedBuffer inputSignatureBuffer = {};
             if (bVSOutputMatchesPSInput)
