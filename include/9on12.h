@@ -6,3 +6,4 @@
 extern "C"
 #endif
 PFND3DDDI_OPENADAPTER Get9on12OpenAdapter();
+
