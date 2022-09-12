@@ -235,7 +235,10 @@ struct SamplerInfo
         };
     };
 
-    SamplerInfo() : Value( 0 )
+    // Initially set all texture types to TEXTURETYPE_2D - we can't go with TEXTURETYPE_UNKNOWN
+    // because the shader converter needs a valid texture type for the shader declaration, even
+    // when a null resource is bound.
+    SamplerInfo() : TextureType( TEXTURETYPE_2D ), TexCoordWrap( 0 )
     {
         C_ASSERT( sizeof( SamplerInfo ) == sizeof( Value ) );
     }
