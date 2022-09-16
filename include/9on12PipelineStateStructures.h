@@ -818,10 +818,13 @@ namespace D3D9on12
 
         // TODO: It's not immediately clear if the branching will more perf issues than it's worth,
         // Toggle this off and on when we're in a position to test perf
+
+        // Enabling this function by default, after finding significant performance improvement in some cases (CS:GO);
+        // The cost of branching does not appear to be greater than the cost of marking dirty flags every time we Set
         template<typename T>
         FORCEINLINE bool IsEquals(T objA, T objB)
         {
-#if 0
+#if 1
             return objA == objB;
 #else
             // The compiler should be smart enough to tell that this means no branching is needed
