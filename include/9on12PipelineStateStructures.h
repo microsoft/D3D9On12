@@ -816,19 +816,10 @@ namespace D3D9on12
         {
         }
 
-        // TODO: It's not immediately clear if the branching will more perf issues than it's worth,
-        // Toggle this off and on when we're in a position to test perf
         template<typename T>
         FORCEINLINE bool IsEquals(T objA, T objB)
         {
-#if 0
             return objA == objB;
-#else
-            // The compiler should be smart enough to tell that this means no branching is needed
-            UNREFERENCED_PARAMETER(objA);
-            UNREFERENCED_PARAMETER(objB);
-            return 0;
-#endif
         }
     };
 
