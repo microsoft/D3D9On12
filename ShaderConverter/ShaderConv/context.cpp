@@ -1384,7 +1384,6 @@ CContext::Translate_NRM( const CInstr& instr )
 {
     // dp3  s0.x, src0, src0
     // rsq  s0.y, s0.x
-    // mov  s0.z, abs( s0.x )
     // movc s0.z, s0.x, s0.y, vec4( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX )
     // mul  dest, src0, s0.z
 
