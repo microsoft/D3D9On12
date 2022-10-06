@@ -419,6 +419,24 @@ namespace D3D9on12
         return result;
     }
 
+    _Check_return_ HRESULT APIENTRY PreExecuteCommandList(_In_ HANDLE hDevice, D3D9ON12_COMMANDLIST_TYPE commandListType)
+    {
+        D3D9on12_DDI_ENTRYPOINT_START(TRUE);
+        Device* pDevice = Device::GetDeviceFromHandle(hDevice);
+        auto clt = static_cast<D3D12TranslationLayer::COMMAND_LIST_TYPE>(commandListType);
+        HRESULT hr = pDevice->GetContext().GetCommandListManager(clt)->PreExecuteCommandQueueCommand();
+        D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR((hr));
+    }
+
+    _Check_return_ HRESULT APIENTRY PostExecuteCommandList(_In_ HANDLE hDevice, D3D9ON12_COMMANDLIST_TYPE commandListType)
+    {
+        D3D9on12_DDI_ENTRYPOINT_START(TRUE);
+        Device* pDevice = Device::GetDeviceFromHandle(hDevice);
+        auto clt = static_cast<D3D12TranslationLayer::COMMAND_LIST_TYPE>(commandListType);
+        HRESULT hr = pDevice->GetContext().GetCommandListManager(clt)->PostExecuteCommandQueueCommand();
+        D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(hr);
+    }
+
     HRESULT Device::FlushWork(bool WaitOnCompletion, UINT /*FlushFlags*/)
     {
         if (WaitOnCompletion)
