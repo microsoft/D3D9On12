@@ -7,7 +7,7 @@ namespace D3D9on12
     class Adapter
     {
     public:
-        Adapter( _Inout_ D3DDDIARG_OPENADAPTER& OpenAdapter, LUID* pAdapterLUID, D3D9ON12_CREATE_DEVICE_ARGS* pArgs );
+        Adapter( _Inout_ D3DDDIARG_OPENADAPTER& OpenAdapter, LUID* pAdapterLUID, D3D9ON12_CREATE_DEVICE_ARGS2* pArgs );
 
         ~Adapter();
 
@@ -45,5 +45,10 @@ namespace D3D9on12
         CComPtr<ID3D12CommandQueue> m_pD3D12CommandQueue;
         DXCoreHardwareID m_HWIDs;
         uint64_t m_DriverVersion;
+
+    public:
+        const D3D9ON12_PRIVATE_CALLBACKS m_privateCallbacks;
+
+        const bool m_bSupportsNewPresent;
     };
 };

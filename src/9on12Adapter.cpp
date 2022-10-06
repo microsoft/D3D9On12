@@ -169,6 +169,31 @@ namespace D3D9on12
             RETURN_E_INVALIDARG_AND_CHECK()
         }
 
+        D3D9ON12_CREATE_DEVICE_ARGS2 args2;
+        args2.NodeMask = pArgs->NodeMask;
+        args2.NumQueues = pArgs->NumQueues;
+        args2.pD3D12Device = pArgs->pD3D12Device;
+        args2.ppD3D12Queues = pArgs->ppD3D12Queues;
+        args2.D3D9On12InterfaceVersion = 1;
+        args2.pPrivateCallbacks = {};
+
+        Adapter* pNewAdapter = new Adapter(*pOpenAdapter, pLUID, &args2);
+        if (pNewAdapter == nullptr)
+        {
+            return E_OUTOFMEMORY;
+        }
+
+        D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
+    }
+
+    _Check_return_ HRESULT APIENTRY OpenAdapter2_Private(_Inout_ D3DDDIARG_OPENADAPTER* pOpenAdapter, _In_ LUID* pLUID, _In_opt_ D3D9ON12_CREATE_DEVICE_ARGS2* pArgs)
+    {
+        D3D9on12_DDI_ENTRYPOINT_START(TRUE);
+        if (pOpenAdapter == nullptr)
+        {
+            RETURN_E_INVALIDARG_AND_CHECK()
+        }
+
         Adapter* pNewAdapter = new Adapter(*pOpenAdapter, pLUID, pArgs);
         if (pNewAdapter == nullptr)
         {
@@ -178,9 +203,11 @@ namespace D3D9on12
         D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }
 
-    Adapter::Adapter( _Inout_ D3DDDIARG_OPENADAPTER& OpenAdapter, LUID* pAdapterLUID, D3D9ON12_CREATE_DEVICE_ARGS* pArgs ) :
+    Adapter::Adapter( _Inout_ D3DDDIARG_OPENADAPTER& OpenAdapter, LUID* pAdapterLUID, D3D9ON12_CREATE_DEVICE_ARGS2* pArgs ) :
         m_AdapterCallbacks( *OpenAdapter.pAdapterCallbacks ),
-        m_pDevice( nullptr )
+        m_pDevice(nullptr),
+        m_privateCallbacks(pArgs->D3D9On12InterfaceVersion >= 2 ? *pArgs->pPrivateCallbacks : D3D9ON12_PRIVATE_CALLBACKS()),
+        m_bSupportsNewPresent(pArgs->D3D9On12InterfaceVersion >= 2 ? m_privateCallbacks.pfnPresentCB != nullptr : false)
     {
         if (RegistryConstants::g_cBreakOnLoad)
         {
@@ -288,6 +315,8 @@ namespace D3D9on12
         OpenAdapter.hAdapter = Adapter::GetHandleFromAdapter( this );
         memcpy( OpenAdapter.pAdapterFuncs, &g_9on12AdapterFunctions, sizeof( *OpenAdapter.pAdapterFuncs ) );// out: Driver function table
         OpenAdapter.DriverVersion = min<UINT>( OpenAdapter.Version, D3D_UMD_INTERFACE_VERSION );            // out: D3D UMD interface version
+
+        pArgs->D3D9On12InterfaceVersion = max(pArgs->D3D9On12InterfaceVersion, (UINT)D3D9ON12_CURRENT_INTERFACE_VERSION);
     }
 
     Adapter::~Adapter()

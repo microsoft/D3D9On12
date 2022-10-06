@@ -50,6 +50,63 @@ namespace D3D9on12
         D3D9on12_DDI_ENTRYPOINT_END_AND_REPORT_HR((HANDLE)0, S_OK);
     }
 
+    HRESULT APIENTRY GetPrivateDDITableVersioned(_Inout_updates_bytes_(ddiTableSize) void* pPrivateDDITableVersioned, UINT ddiTableSize)
+    {
+        D3D9on12_DDI_ENTRYPOINT_START(TRUE);
+        if (ddiTableSize > sizeof(D3D9ON12_PRIVATE_DDI_TABLE_VERSIONED))
+        {
+            return E_INVALIDARG;
+        }
+
+        static const D3D9ON12_PRIVATE_DDI_TABLE_VERSIONED cPrivateDDITable =
+        {
+            OpenAdapter_Private,
+
+            GetSharedGDIHandle_Private,
+            CreateSharedNTHandle_Private,
+            GetDeviceExecutionState_Private,
+            KmdPresent,
+
+            CreateFence,
+            OpenFence,
+            ShareFence,
+            WaitForFence,
+            SignalFence,
+
+            GetCompletedFenceValue,
+            DestroyTrackedFence,
+
+            QueryResourcePrivateDriverDataSize,
+            OpenResource_Private,
+
+            CreateKMTHandle,
+            QueryResourceInfoFromKMTHandle,
+            DestroyKMTHandle,
+
+            CreateResourceWrappingHandle,
+            DestroyResourceWrappingHandle,
+
+            GetD3D12Device,
+            TransitionResource,
+            SetCurrentResourceState,
+
+            SetMaximumFrameLatency,
+            IsMaximumFrameLatencyReached,
+            GetD3D12Resource,
+            AddResourceWaitsToQueue,
+            AddDeferredWaitsToResource,
+
+            // interface version 2
+            OpenAdapter2_Private,
+            CloseAndSubmitGraphicsCommandListForPresent,
+            PreExecuteCommandList,
+            PostExecuteCommandList
+        };
+        memcpy(pPrivateDDITableVersioned, &cPrivateDDITable, ddiTableSize);
+        
+        D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
+    }
+
     _Check_return_ HRESULT APIENTRY GetDeviceExecutionState_Private(_In_ HANDLE hDevice)
     {
         D3D9on12_DDI_ENTRYPOINT_START(TRUE);
