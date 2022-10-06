@@ -178,9 +178,22 @@ namespace D3D9on12
         D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(S_OK);
     }
 
+    bool CheckInterfaceVersion(UINT minVersion, D3D9ON12_CREATE_DEVICE_ARGS* args)
+    {
+        if (args->D3D9On12InterfaceVersion > (D3D9ON12_CURRENT_INTERFACE_VERSION + 1))
+        {
+            // D3D9On12InterfaceVersion will always be incremented after c_CurrentD3D9On12InterfaceVersion is incremented,
+            // but D3D9On12InterfaceVersion didn't always exist. This check is to see if we are reading garbage in that case.
+            return false;
+        }
+        return args->D3D9On12InterfaceVersion >= minVersion;
+    }
+
     Adapter::Adapter( _Inout_ D3DDDIARG_OPENADAPTER& OpenAdapter, LUID* pAdapterLUID, D3D9ON12_CREATE_DEVICE_ARGS* pArgs ) :
         m_AdapterCallbacks( *OpenAdapter.pAdapterCallbacks ),
-        m_pDevice( nullptr )
+        m_pDevice(nullptr),
+        m_privateCallbacks(CheckInterfaceVersion(2, pArgs) ? *pArgs->pPrivateCallbacks : D3D9ON12_PRIVATE_CALLBACKS()),
+        m_bSupportsNewPresent(CheckInterfaceVersion(2, pArgs) ? m_privateCallbacks.pfnPresentCB != nullptr : false)
     {
         if (RegistryConstants::g_cBreakOnLoad)
         {
@@ -288,6 +301,12 @@ namespace D3D9on12
         OpenAdapter.hAdapter = Adapter::GetHandleFromAdapter( this );
         memcpy( OpenAdapter.pAdapterFuncs, &g_9on12AdapterFunctions, sizeof( *OpenAdapter.pAdapterFuncs ) );// out: Driver function table
         OpenAdapter.DriverVersion = min<UINT>( OpenAdapter.Version, D3D_UMD_INTERFACE_VERSION );            // out: D3D UMD interface version
+
+        if (CheckInterfaceVersion(2, pArgs))
+        {
+            // make sure we don't write beyond the struct if d3d9 is still using version 1 (no version field)
+            pArgs->D3D9On12InterfaceVersion = max(pArgs->D3D9On12InterfaceVersion, (UINT)D3D9ON12_CURRENT_INTERFACE_VERSION);
+        }
     }
 
     Adapter::~Adapter()

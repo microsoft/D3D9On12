@@ -5,6 +5,7 @@
 namespace D3D9on12
 {
     void APIENTRY GetPrivateDDITable(D3D9ON12_PRIVATE_DDI_TABLE *pPrivateDDITable);
+    HRESULT APIENTRY GetPrivateDDITableVersioned(_Inout_updates_bytes_(ddiTableSize) void* pPrivateDDITableVersioned, UINT ddiTableSize);
 
     /* Private DDI for 9on12 */
     _Check_return_ HRESULT APIENTRY OpenAdapter_Private(_Inout_ D3DDDIARG_OPENADAPTER* pOpenAdapter, _In_ LUID *pLUID, _In_opt_ D3D9ON12_CREATE_DEVICE_ARGS* pArgs);
@@ -40,7 +41,12 @@ namespace D3D9on12
 
     void APIENTRY SetMaximumFrameLatency(HANDLE hDD, UINT MaxFrameLatency);
     BOOL APIENTRY IsMaximumFrameLatencyReached(HANDLE hDD);
-    
+
+    /*interface version 2*/
+    _Check_return_ HRESULT APIENTRY CloseAndSubmitGraphicsCommandListForPresent(_In_ HANDLE hDevice, BOOL commandsAdded, _In_reads_(numSrcSurfaces) const D3DDDIARG_PRESENTSURFACE* pSrcSurfaces, UINT numSrcSurfaces, _In_opt_ HANDLE hDestResource, _In_ D3DKMT_PRESENT* pKMTPresent);
+    _Check_return_ HRESULT APIENTRY PreExecuteCommandList(_In_ HANDLE hDevice, D3D9ON12_COMMANDLIST_TYPE commandListType);
+    _Check_return_ HRESULT APIENTRY PostExecuteCommandList(_In_ HANDLE hDevice, D3D9ON12_COMMANDLIST_TYPE commandListType);
+
     /* Adapter forward declarations */
     _Check_return_ HRESULT APIENTRY GetCaps(_In_ HANDLE hAdapter, _Inout_ CONST D3DDDIARG_GETCAPS* pGetCaps);
     _Check_return_ HRESULT APIENTRY CreateDevice(_In_ HANDLE hAdapter, _Inout_ D3DDDIARG_CREATEDEVICE* pCreateDevice);
