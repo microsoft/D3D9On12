@@ -25,6 +25,7 @@ namespace D3D9on12
         HRESULT Destroy();
         HRESULT FlushWork(bool WaitOnCompletion, UINT FlushFlags = 0);
         HRESULT Present(CONST D3DDDIARG_PRESENT1& PresentArgs, D3DKMT_PRESENT *pKMTArgs);
+        HRESULT CloseAndSubmitGraphicsCommandListForPresent(BOOL commandsAdded, _In_reads_(numSrcSurfaces) const D3DDDIARG_PRESENTSURFACE* pSrcSurfaces, UINT numSrcSurfaces, _In_opt_ HANDLE hDestResource, _In_ D3DKMT_PRESENT* pKMTPresent);
 
         void MarkStateAsDirty();
 
@@ -163,5 +164,10 @@ namespace D3D9on12
         VideoDevice *m_pVideoDevice;
 
         bool m_drawingPreTransformedVerts = false;
+
+        //This should be cleared before each use. we're just saving the allocation
+        std::vector<D3D12TranslationLayer::PresentSurface> m_d3d12tlPresentSurfaces;
+        //This should be cleared before each use. we're just saving the allocation
+        std::vector<D3DDDIARG_PRESENTSURFACE> m_d3d9PresentSurfaces;
     };
 };
