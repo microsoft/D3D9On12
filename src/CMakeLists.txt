@@ -32,6 +32,7 @@ else()
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../packages.config ${CMAKE_CURRENT_BINARY_DIR}/packages.config COPYONLY)
     add_library(dxbcsigner INTERFACE IMPORTED GLOBAL)
     set_target_properties(dxbcsigner PROPERTIES INTERFACE_LINK_LIBRARIES "${CMAKE_BINARY_DIR}/packages/Microsoft.Direct3D.DxbcSigner.1.0.0/build/native/Microsoft.Direct3D.DxbcSigner.targets")
+    set_target_properties(d3d9on12 PROPERTIES LINK_FLAGS "/DELAYLOAD:dxbcSigner.dll")
     target_link_libraries(d3d9on12 dxbcsigner)
 endif()
 target_include_directories(d3d9on12
