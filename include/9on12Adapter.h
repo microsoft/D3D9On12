@@ -50,5 +50,6 @@ namespace D3D9on12
         const D3D9ON12_PRIVATE_CALLBACKS m_privateCallbacks;
 
         const bool m_bSupportsNewPresent;
+        const bool m_bSupportsShaderSigning;
     };
 };
