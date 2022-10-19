@@ -643,7 +643,16 @@ namespace D3D9on12
 
                 if (SUCCEEDED( hr ))
                 {
-                    hr = SignDxbc( combinedCode.get(), combinedLength );
+                    Adapter adapter = m_parentDevice.GetAdapter();
+                    if (adapter.m_bSupportsShaderSigning)
+                    {
+                        hr = adapter.m_privateCallbacks.pfnSignDxbcCB(combinedCode.get(), combinedLength);
+                    }
+                    else
+                    {
+                        //Triggers delayload of dxbcSigner.dll
+                        hr = SignDxbc(combinedCode.get(), combinedLength);
+                    }
                 }
 
                 if (SUCCEEDED(hr))

@@ -207,7 +207,8 @@ namespace D3D9on12
         m_AdapterCallbacks( *OpenAdapter.pAdapterCallbacks ),
         m_pDevice(nullptr),
         m_privateCallbacks(pArgs->D3D9On12InterfaceVersion >= 2 ? *pArgs->pPrivateCallbacks : D3D9ON12_PRIVATE_CALLBACKS()),
-        m_bSupportsNewPresent(pArgs->D3D9On12InterfaceVersion >= 2 ? m_privateCallbacks.pfnPresentCB != nullptr : false)
+        m_bSupportsNewPresent(pArgs->D3D9On12InterfaceVersion >= 2 ? m_privateCallbacks.pfnPresentCB != nullptr : false),
+        m_bSupportsShaderSigning(pArgs->D3D9On12InterfaceVersion >= 2 ? m_privateCallbacks.pfnSignDxbcCB != nullptr : false)
     {
         if (RegistryConstants::g_cBreakOnLoad)
         {
