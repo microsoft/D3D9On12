@@ -253,6 +253,7 @@ namespace D3D9on12
         {
             if (inputLayout.VerticesArePreTransformed())
             {
+                device.SetDrawingPreTransformedVerts(true);
                 m_pCurrentD3D12VS = &m_tlShaderCache.GetD3D12ShaderForTL(inputLayout, m_rasterStates.GetRasterState());
 
                 psoDesc.VS = m_pCurrentD3D12VS->GetUnderlying()->GetByteCode();
@@ -261,6 +262,7 @@ namespace D3D9on12
             }
             else
             {
+                device.SetDrawingPreTransformedVerts(false);
                 m_pCurrentD3D12VS = &m_pCurrentVS->GetD3D12Shader(m_rasterStates.GetRasterState(), inputLayout);
 
                 psoDesc.VS = m_pCurrentD3D12VS->GetUnderlying()->GetByteCode();

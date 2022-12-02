@@ -163,8 +163,6 @@ namespace D3D9on12
         BYTE m_pVideoDeviceSpace[sizeof(VideoDevice)];
         VideoDevice *m_pVideoDevice;
 
-        bool m_drawingPreTransformedVerts = false;
-
         //This should be cleared before each use. we're just saving the allocation
         std::vector<D3D12TranslationLayer::PresentSurface> m_d3d12tlPresentSurfaces;
         //This should be cleared before each use. we're just saving the allocation
