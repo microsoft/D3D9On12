@@ -297,7 +297,7 @@ namespace D3D9on12
         Device* pDevice = p9on12Resource->GetParent();
         auto& ImmCtx = pDevice->GetContext();
 
-        if (ImmCtx.IsResidencyManagementEnabled() && pResidencyHandle)
+        if (pResidencyHandle)
         {
             // Pin the resource while it is checked out to the caller.
             pResidencyHandle->Pin();
@@ -364,7 +364,7 @@ namespace D3D9on12
 
         pTranslationLayerResource->AddDeferredWaits(DeferredWaits);
 
-        if (ImmCtx.IsResidencyManagementEnabled() && pResidencyHandle)
+        if (pResidencyHandle)
         {
             // Transition from an explicit pin to a pin until these waits are satisfied.
             pResidencyHandle->AddPinWaits(NumSync, pSignalValues, ppFences);
@@ -474,7 +474,7 @@ namespace D3D9on12
             args.RenamingIsMultithreaded = args.CreatesAndDestroysAreMultithreaded;
             args.UseThreadpoolForPSOCreates = false;
             args.UseRoundTripPSOs = false;
-            args.UseResidencyManagement = !RegistryConstants::g_cDisableMemoryManagement;
+            args.UseResidencyManagement = true;
             args.DisableGPUTimeout = false;
             args.AdjustYUY2BlitCoords = m_Adapter.RequiresYUY2BlitWorkaround();
 #ifdef __D3D9On12CreatorID_INTERFACE_DEFINED__

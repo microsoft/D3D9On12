@@ -23,7 +23,6 @@ namespace D3D9on12
         static const LPCSTR g_cValidateShaders = "ValidateShaders";
         static const LPCSTR g_cSingleThread = "Singlethread";
         static const LPCSTR g_cPresentWithDummyWindow = "PresentWithDummyWindow";
-        static const LPCSTR g_cDisableMemoryManagement = "DisableResidencyManagement";
         static const LPCSTR g_cAnythingTimes0Equals0 = "AnythingTimes0Equals0";
         static const LPCSTR g_cPSOCacheTrimLimitSize = "PSOCacheTrimLimitSize";
         static const LPCSTR g_cPSOCacheTrimLimitAge = "PSOCacheTrimLimitAge";
@@ -100,7 +99,6 @@ namespace D3D9on12
         static const bool g_cUseDebugLayer = CheckRegistryKey(RegistryKeys::g_cDebugLayerEnabledKey);
         static const bool g_cBreakOnLoad = CheckRegistryKey(RegistryKeys::g_cBreakOnLoadKey);
         static const bool g_cSingleThread = CheckRegistryKey(RegistryKeys::g_cSingleThread);  
-        static const bool g_cDisableMemoryManagement = CheckRegistryKey(RegistryKeys::g_cDisableMemoryManagement);
         static const DWORD g_cPSOCacheTrimLimitSize = CheckRegistryKeyDWORD(RegistryKeys::g_cPSOCacheTrimLimitSize, MAXDWORD);
         static const DWORD g_cPSOCacheTrimLimitAge = CheckRegistryKeyDWORD(RegistryKeys::g_cPSOCacheTrimLimitAge, MAXDWORD);
         static const DWORD g_cMaxAllocatedUploadHeapSpacePerCommandList = CheckRegistryKeyDWORD(RegistryKeys::g_cMaxAllocatedUploadHeapSpacePerCommandList, MAXDWORD);
