@@ -292,7 +292,7 @@ namespace D3D9on12
 
         Resource* p9on12Resource = Resource::GetResourceFromHandle(hResource);
         auto* pTranslationLayerResource = p9on12Resource->GetUnderlyingResource();
-        D3DX12Residency::ManagedObject* pResidencyHandle = pTranslationLayerResource->GetResidencyHandle();
+        D3D12TranslationLayer::ManagedObject* pResidencyHandle = pTranslationLayerResource->GetResidencyHandle();
 
         Device* pDevice = p9on12Resource->GetParent();
         auto& ImmCtx = pDevice->GetContext();
@@ -303,14 +303,13 @@ namespace D3D9on12
             pResidencyHandle->Pin();
 
             // Ensure that the resource is resident after the waits on the callers queue are satisfied.
-            std::unique_ptr<D3DX12Residency::ResidencySet> pResidencySet = std::unique_ptr<D3DX12Residency::ResidencySet>(
-                ImmCtx.GetResidencyManager().CreateResidencySet());
+            auto pResidencySet = std::make_unique<D3D12TranslationLayer::ResidencySet>();
 
-            pResidencySet->Open();
+            pResidencySet->Open((UINT)D3D12TranslationLayer::COMMAND_LIST_TYPE::MAX_VALID);
             pResidencySet->Insert(pResidencyHandle);
             pResidencySet->Close();
 
-            ImmCtx.GetResidencyManager().SubmitCommandQueueCommand(pCommmandQueue, []() {}, pResidencySet.get());
+            ImmCtx.GetResidencyManager().SubmitCommandQueueCommand(pCommmandQueue, UINT_MAX, pResidencySet.get(), []() {});
             
             // Add a deferred wait for the residency operation.  This operation is signaled on the callers queue.
             // This handles the case where caller decides to return the resource without scheduling dependent work
@@ -344,7 +343,7 @@ namespace D3D9on12
 
         Resource* p9on12Resource = Resource::GetResourceFromHandle(hResource);
         auto* pTranslationLayerResource = p9on12Resource->GetUnderlyingResource();
-        D3DX12Residency::ManagedObject* pResidencyHandle = pTranslationLayerResource->GetResidencyHandle();
+        D3D12TranslationLayer::ManagedObject* pResidencyHandle = pTranslationLayerResource->GetResidencyHandle();
 
         Device* pDevice = p9on12Resource->GetParent();
         auto& ImmCtx = pDevice->GetContext();
