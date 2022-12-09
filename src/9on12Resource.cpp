@@ -1024,7 +1024,12 @@ namespace D3D9on12
             }
 
             const D3D12TranslationLayer::RESOURCE_USAGE UsageFlag = GetResourceUsage(createArgs.Flags, m_CpuAccessFlags);
-            const D3D12_HEAP_TYPE HeapType = D3D12TranslationLayer::Resource::GetD3D12HeapType(UsageFlag, m_CpuAccessFlags);
+            D3D12_HEAP_TYPE HeapType = D3D12TranslationLayer::Resource::GetD3D12HeapType(UsageFlag, m_CpuAccessFlags);
+            if (HeapType == D3D12_HEAP_TYPE_UPLOAD && (createArgs.Flags.VertexBuffer || createArgs.Flags.IndexBuffer) &&
+                createArgs.Flags.HintStatic)
+            {
+                HeapType = D3D12_HEAP_TYPE_DEFAULT;
+            }
 
             m_TranslationLayerCreateArgs.m_desc12 = m_desc;
             m_TranslationLayerCreateArgs.m_appDesc = ConvertToAppResourceDesc(m_desc,
