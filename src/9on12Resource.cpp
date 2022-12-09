@@ -1315,7 +1315,7 @@ namespace D3D9on12
         // In the async case, we need to make sure that we don't touch m_pResource's identity,
         // as this could be changing out from under us. However, m_pResource is safe to query
         // information from. Instead of using m_pResource's identity, use m_LastRenamedResource.
-        D3D12TranslationLayer::SafeRenameResourceCookie pCookieProtector(device.GetContext());
+        D3D12TranslationLayer::SafeRenameResourceCookie pCookieProtector;
         if (bAsyncLock)
         {
             // TODO: (11369816) Not supporting lock async with non-buffers or CPU readable resources
