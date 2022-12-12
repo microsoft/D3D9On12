@@ -292,25 +292,24 @@ namespace D3D9on12
 
         Resource* p9on12Resource = Resource::GetResourceFromHandle(hResource);
         auto* pTranslationLayerResource = p9on12Resource->GetUnderlyingResource();
-        D3DX12Residency::ManagedObject* pResidencyHandle = pTranslationLayerResource->GetResidencyHandle();
+        D3D12TranslationLayer::ManagedObject* pResidencyHandle = pTranslationLayerResource->GetResidencyHandle();
 
         Device* pDevice = p9on12Resource->GetParent();
         auto& ImmCtx = pDevice->GetContext();
 
-        if (ImmCtx.IsResidencyManagementEnabled() && pResidencyHandle)
+        if (pResidencyHandle)
         {
             // Pin the resource while it is checked out to the caller.
             pResidencyHandle->Pin();
 
             // Ensure that the resource is resident after the waits on the callers queue are satisfied.
-            std::unique_ptr<D3DX12Residency::ResidencySet> pResidencySet = std::unique_ptr<D3DX12Residency::ResidencySet>(
-                ImmCtx.GetResidencyManager().CreateResidencySet());
+            auto pResidencySet = std::make_unique<D3D12TranslationLayer::ResidencySet>();
 
-            pResidencySet->Open();
+            pResidencySet->Open((UINT)D3D12TranslationLayer::COMMAND_LIST_TYPE::MAX_VALID);
             pResidencySet->Insert(pResidencyHandle);
             pResidencySet->Close();
 
-            ImmCtx.GetResidencyManager().SubmitCommandQueueCommand(pCommmandQueue, []() {}, pResidencySet.get());
+            ImmCtx.GetResidencyManager().SubmitCommandQueueCommand(pCommmandQueue, UINT_MAX, pResidencySet.get(), []() {});
             
             // Add a deferred wait for the residency operation.  This operation is signaled on the callers queue.
             // This handles the case where caller decides to return the resource without scheduling dependent work
@@ -344,7 +343,7 @@ namespace D3D9on12
 
         Resource* p9on12Resource = Resource::GetResourceFromHandle(hResource);
         auto* pTranslationLayerResource = p9on12Resource->GetUnderlyingResource();
-        D3DX12Residency::ManagedObject* pResidencyHandle = pTranslationLayerResource->GetResidencyHandle();
+        D3D12TranslationLayer::ManagedObject* pResidencyHandle = pTranslationLayerResource->GetResidencyHandle();
 
         Device* pDevice = p9on12Resource->GetParent();
         auto& ImmCtx = pDevice->GetContext();
@@ -364,7 +363,7 @@ namespace D3D9on12
 
         pTranslationLayerResource->AddDeferredWaits(DeferredWaits);
 
-        if (ImmCtx.IsResidencyManagementEnabled() && pResidencyHandle)
+        if (pResidencyHandle)
         {
             // Transition from an explicit pin to a pin until these waits are satisfied.
             pResidencyHandle->AddPinWaits(NumSync, pSignalValues, ppFences);
@@ -474,7 +473,7 @@ namespace D3D9on12
             args.RenamingIsMultithreaded = args.CreatesAndDestroysAreMultithreaded;
             args.UseThreadpoolForPSOCreates = false;
             args.UseRoundTripPSOs = false;
-            args.UseResidencyManagement = !RegistryConstants::g_cDisableMemoryManagement;
+            args.UseResidencyManagement = true;
             args.DisableGPUTimeout = false;
             args.AdjustYUY2BlitCoords = m_Adapter.RequiresYUY2BlitWorkaround();
 #ifdef __D3D9On12CreatorID_INTERFACE_DEFINED__

@@ -26,8 +26,7 @@ namespace D3D9on12
         {
             std::shared_ptr<PipelineStateCacheEntry>& cacheEntry = it->second;
             assert(cacheEntry.get() == cacheEntry->m_accessOrderPos->get());
-            m_cache.m_accessOrder.erase(cacheEntry->m_accessOrderPos);
-            m_cache.m_accessOrder.emplace_front(cacheEntry);
+            m_cache.m_accessOrder.splice(m_cache.m_accessOrder.begin(), m_cache.m_accessOrder, cacheEntry->m_accessOrderPos);
             cacheEntry->m_accessOrderPos = m_cache.m_accessOrder.begin();
             cacheEntry->m_timestamp = timestamp;
             return cacheEntry->m_pPipelineState.get();

@@ -1024,7 +1024,12 @@ namespace D3D9on12
             }
 
             const D3D12TranslationLayer::RESOURCE_USAGE UsageFlag = GetResourceUsage(createArgs.Flags, m_CpuAccessFlags);
-            const D3D12_HEAP_TYPE HeapType = D3D12TranslationLayer::Resource::GetD3D12HeapType(UsageFlag, m_CpuAccessFlags);
+            D3D12_HEAP_TYPE HeapType = D3D12TranslationLayer::Resource::GetD3D12HeapType(UsageFlag, m_CpuAccessFlags);
+            if (HeapType == D3D12_HEAP_TYPE_UPLOAD && (createArgs.Flags.VertexBuffer || createArgs.Flags.IndexBuffer) &&
+                createArgs.Flags.HintStatic)
+            {
+                HeapType = D3D12_HEAP_TYPE_DEFAULT;
+            }
 
             m_TranslationLayerCreateArgs.m_desc12 = m_desc;
             m_TranslationLayerCreateArgs.m_appDesc = ConvertToAppResourceDesc(m_desc,
@@ -1315,7 +1320,7 @@ namespace D3D9on12
         // In the async case, we need to make sure that we don't touch m_pResource's identity,
         // as this could be changing out from under us. However, m_pResource is safe to query
         // information from. Instead of using m_pResource's identity, use m_LastRenamedResource.
-        D3D12TranslationLayer::SafeRenameResourceCookie pCookieProtector(device.GetContext());
+        D3D12TranslationLayer::SafeRenameResourceCookie pCookieProtector;
         if (bAsyncLock)
         {
             // TODO: (11369816) Not supporting lock async with non-buffers or CPU readable resources
