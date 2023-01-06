@@ -4683,8 +4683,10 @@ void CShaderAsmWrapper::PatchMultiplicandArgs(
     {
         // Assuming neither src's are safe as multiplicands, the emitted asm is:
         //
-        // movc temp0, src0, src1, 0.0f
-        // movc temp1, src1, src0, 0.0f
+        // mov  temp0, _abs(src0)
+        // movc temp0, temp0, src1, 0.0f
+        // mov  temp1, _abs(src1)
+        // movc temp1, temp1, src0, 0.0f
         //
         // This ensures that temp0 * temp1 == src0 * src1 except for cases when
         // either may have inf/nan. In these cases, the movc ensures that if the 
@@ -4693,9 +4695,15 @@ void CShaderAsmWrapper::PatchMultiplicandArgs(
         {
             EmitExtraInstructionInternal(
                 CInstruction(
+                    D3D10_SB_OPCODE_MOV,
+                    CTempOperandDst(SREG_MUL0),
+                    CAbs(src0)));
+
+            EmitExtraInstructionInternal(
+                CInstruction(
                     D3D10_SB_OPCODE_MOVC,
                     CTempOperandDst(SREG_MUL0),
-                    src0,
+                    CTempOperand4(SREG_MUL0),
                     src1,
                     COperand(0.0f)));
 
@@ -4706,9 +4714,15 @@ void CShaderAsmWrapper::PatchMultiplicandArgs(
         {
             EmitExtraInstructionInternal(
                 CInstruction(
+                    D3D10_SB_OPCODE_MOV,
+                    CTempOperandDst(SREG_MUL1),
+                    CAbs(src1)));
+
+            EmitExtraInstructionInternal(
+                CInstruction(
                     D3D10_SB_OPCODE_MOVC,
                     CTempOperandDst(SREG_MUL1),
-                    src1,
+                    CTempOperand4(SREG_MUL1),
                     src0,
                     COperand(0.0f)));
             src0 = CTempOperand4(SREG_MUL1);
