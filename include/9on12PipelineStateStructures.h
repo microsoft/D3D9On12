@@ -477,7 +477,7 @@ namespace D3D9on12
         return depthStencilDesc;
     }
 
-    static D3D12_SAMPLER_DESC ConvertSampler(SamplerStateID samplerID)
+    static D3D12_SAMPLER_DESC ConvertSampler(SamplerStateID samplerID, bool supportAnisoPointMip)
     {
         D3D12_SAMPLER_DESC samplerDesc = {};
         samplerDesc.MinLOD = static_cast<float>(samplerID.MaxMipLevel);
@@ -487,7 +487,8 @@ namespace D3D9on12
             static_cast<D3DTEXTUREFILTERTYPE>(samplerID.MagFilter),
             static_cast<D3DTEXTUREFILTERTYPE>(samplerID.MinFilter),
             static_cast<D3DTEXTUREFILTERTYPE>(samplerID.MipFilter),
-            samplerID.UseHardwareShadowMapping);
+            samplerID.UseHardwareShadowMapping,
+            supportAnisoPointMip);
 
         samplerDesc.AddressU = ConvertToD3D12TextureAddress(static_cast<D3DTEXTUREADDRESS>(samplerID.AddressU));
         samplerDesc.AddressV = ConvertToD3D12TextureAddress(static_cast<D3DTEXTUREADDRESS>(samplerID.AddressV));

@@ -996,7 +996,7 @@ namespace D3D9on12
         auto result = m_map.find(id);
         if (result == m_map.end())
         {
-            D3D12_SAMPLER_DESC createSamplerDesc = ConvertSampler(id);
+            D3D12_SAMPLER_DESC createSamplerDesc = ConvertSampler(id, device.m_Options19.AnisoFilterWithPointMipSupported);
 
             m_map[id] = std::unique_ptr<D3D12TranslationLayer::Sampler>(new D3D12TranslationLayer::Sampler(&device.GetContext(), createSamplerDesc));
 

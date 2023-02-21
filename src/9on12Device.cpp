@@ -519,6 +519,8 @@ namespace D3D9on12
         {
             m_Adapter.DeviceCreated(this);
         }
+
+        (void)GetDevice().CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS19, &m_Options19, sizeof(m_Options19));
         return hr;
     }
 

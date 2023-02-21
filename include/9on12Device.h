@@ -109,6 +109,8 @@ namespace D3D9on12
         ShaderDedupe<VertexShader> m_VSDedupe;
         ShaderDedupe<PixelShader> m_PSDedupe;
 
+        D3D12_FEATURE_DATA_D3D12_OPTIONS19 m_Options19;
+
         D3D12TranslationLayer::COptLockedContainer<std::unordered_map<Resource*, std::vector<LockRange>>> m_lockedResourceRanges;
         void SetDrawingPreTransformedVerts(bool preTransformedVerts);
 
