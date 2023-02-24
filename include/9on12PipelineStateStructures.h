@@ -564,7 +564,7 @@ namespace D3D9on12
 
         void SetPrimitiveType(D3DPRIMITIVETYPE inPrimitiveType)
         {
-            if (!IsEquals(inPrimitiveType, inPrimitiveType))
+            if (!IsEquals((D3DPRIMITIVETYPE)PrimitiveType, inPrimitiveType))
             {
                 PrimitiveType = inPrimitiveType;
                 MarkGSDirty();
