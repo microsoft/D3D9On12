@@ -335,14 +335,17 @@ namespace D3D9on12
             m_dirtyFlags.RasterizerState = true;
             break;
         case D3DRS_MULTISAMPLEANTIALIAS:
+            if (dwValue >= 2u) dwValue = TRUE;
             m_rasterizerStateID.MultiSampleAntiAlias = dwValue;
             m_dirtyFlags.RasterizerState = true;
             break;
         case D3DRS_ANTIALIASEDLINEENABLE:
+            if (dwValue >= 2u) dwValue = TRUE;
             m_rasterizerStateID.AntialiasedLineEnable = dwValue;
             m_dirtyFlags.RasterizerState = true;
             break;
         case D3DRS_CLIPPING:
+            if (dwValue >= 2u) dwValue = TRUE;
             m_rasterizerStateID.DepthClipEnable = dwValue;
             m_dirtyFlags.RasterizerState = true;
             break;
@@ -474,18 +477,22 @@ namespace D3D9on12
         {
             // Blend states  
         case D3DRS_ALPHABLENDENABLE:
+            if (dwValue >= 2) dwValue = TRUE;
             m_blendStateID.AlphaBlendEnable = dwValue;
             m_dirtyFlags.BlendState = true;
             break;
         case D3DRS_SRCBLEND:
+            if (dwValue >= 32) dwValue = D3DBLEND_ONE;
             m_blendStateID.SrcBlend = dwValue;
             m_dirtyFlags.BlendState = true;
             break;
         case D3DRS_DESTBLEND:
+            if (dwValue >= 32) dwValue = D3DBLEND_ZERO;
             m_blendStateID.DstBlend = dwValue;
             m_dirtyFlags.BlendState = true;
             break;
         case D3DRS_BLENDOP:
+            if (dwValue >= 8) dwValue = D3DBLENDOP_ADD;
             m_blendStateID.BlendOp = dwValue;
             m_dirtyFlags.BlendState = true;
             break;
@@ -498,21 +505,24 @@ namespace D3D9on12
             }
             break;
         case D3DRS_SEPARATEALPHABLENDENABLE:
+            if (dwValue >= 2) dwValue = TRUE;
             m_blendStateID.SeparateAlphaBlend = dwValue;
             m_dirtyFlags.BlendState = true;
             break;
         case D3DRS_SRCBLENDALPHA:
+            if (dwValue >= 32) dwValue = D3DBLEND_ONE;
             m_blendStateID.SrcBlendAlpha = dwValue;
             m_dirtyFlags.BlendState = true;
             break;
         case D3DRS_DESTBLENDALPHA:
+            if (dwValue >= 32) dwValue = D3DBLEND_ZERO;
             m_blendStateID.DstBlendAlpha = dwValue;
             m_dirtyFlags.BlendState = true;
             break;
         case D3DRS_BLENDOPALPHA:
             assert(dwValue <= D3DBLENDOP_MAX);
             // Assuming the app is asking for "default" behavior
-            if (dwValue == 0)
+            if (dwValue == 0 || dwValue > D3DBLENDOP_MAX)
             {
                 dwValue = D3DBLENDOP_ADD;
             }

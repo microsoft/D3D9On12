@@ -281,6 +281,20 @@ namespace D3D9on12
             return;
         }
 
+        // check for integer bitfield overflow causing issues with some apps submitting invalid
+        // sampler state values. 
+        if ((dwState == D3DTSS_MAGFILTER && dwValue >= 16u) ||
+            (dwState == D3DTSS_MINFILTER && dwValue >= 16u) ||
+            (dwState == D3DTSS_MIPFILTER && dwValue >= 16u) ||
+            (dwState == D3DTSS_ADDRESSU && dwValue >= 8u) ||
+            (dwState == D3DTSS_ADDRESSV && dwValue >= 8u) ||
+            (dwState == D3DTSS_ADDRESSW && dwValue >= 8u) ||
+            (dwState == D3DTSS_MAXANISOTROPY && dwValue >= 256u))
+        {
+	        Check9on12(false);
+            return;
+        }
+
         m_dwTextureStageStates[dwStage][dwState] = dwValue;
 
         SamplerStateID& samplerID = m_pixelStage.GetSamplerID(dwStage);
