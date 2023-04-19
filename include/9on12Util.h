@@ -634,6 +634,8 @@ __pragma(warning(suppress:4127)) /* conditional is constant due to constant macr
                 return D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR;
             case D3D12_FILTER_ANISOTROPIC                    :
                 return D3D12_FILTER_COMPARISON_ANISOTROPIC;
+            case D3D12_FILTER_MIN_MAG_ANISOTROPIC_MIP_POINT  :
+                return D3D12_FILTER_COMPARISON_MIN_MAG_ANISOTROPIC_MIP_POINT;
             default:
                 Check9on12(false);
                 return (D3D12_FILTER)-1;
@@ -643,12 +645,15 @@ __pragma(warning(suppress:4127)) /* conditional is constant due to constant macr
     static D3D12_FILTER ConvertToD3D12Filter(
         D3DTEXTUREFILTERTYPE magFilter,
         D3DTEXTUREFILTERTYPE minFilter,
-        D3DTEXTUREFILTERTYPE mipFilter)
+        D3DTEXTUREFILTERTYPE mipFilter,
+        bool supportAnisoPointMip)
     {
         if ((D3DTEXF_ANISOTROPIC == minFilter)
             || (D3DTEXF_ANISOTROPIC == magFilter))
         {
-            return D3D12_FILTER_ANISOTROPIC;
+            return (mipFilter == D3DTEXF_POINT && supportAnisoPointMip) ?
+                D3D12_FILTER_MIN_MAG_ANISOTROPIC_MIP_POINT :
+                D3D12_FILTER_ANISOTROPIC;
         }
         switch (mipFilter)
         {
@@ -717,9 +722,10 @@ __pragma(warning(suppress:4127)) /* conditional is constant due to constant macr
         D3DTEXTUREFILTERTYPE magFilter,
         D3DTEXTUREFILTERTYPE minFilter,
         D3DTEXTUREFILTERTYPE mipFilter,
-        bool comparisonEnabled)
+        bool comparisonEnabled,
+        bool supportAnisoPointMip)
     {
-        D3D12_FILTER filter = ConvertToD3D12Filter(magFilter, minFilter, mipFilter);
+        D3D12_FILTER filter = ConvertToD3D12Filter(magFilter, minFilter, mipFilter, supportAnisoPointMip);
         if (comparisonEnabled)
         {
             filter = ConvertToD3D12ComparisonFilter(filter);
