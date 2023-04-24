@@ -302,6 +302,11 @@ namespace D3D9on12
             }
             else
             {
+                if (m_pCurrentD3D12GS != &geo)
+                {
+                    // Changing GS, pixel shader may need to be updated
+                    m_dirtyFlags.PixelShader = true;
+                }
                 m_pCurrentD3D12GS = &geo;
 
                 device.GetConstantsManager().UpdateGeometryShaderExtension(m_VSExtension.GetVSCBExtension());
@@ -309,6 +314,11 @@ namespace D3D9on12
         }
         else
         {
+            if (m_pCurrentD3D12GS != nullptr)
+            {
+                // Changing GS, pixel shader may need to be updated
+                m_dirtyFlags.PixelShader = true;
+            }
             psoDesc.GS = {};
             m_pCurrentD3D12GS = nullptr;
         }
