@@ -210,22 +210,38 @@ namespace D3D9on12
 
         //Bind Internal Extension Constants (used by the Shader Converter)
         {
-            BindToPipeline(m_device, m_vertexShaderData.m_extension, D3D12TranslationLayer::EShaderStage::e_VS);
-            BindToPipeline(m_device, m_geometryShaderData.m_extension, D3D12TranslationLayer::EShaderStage::e_GS);
-            BindToPipeline(m_device, m_pixelShaderData.m_extension1, D3D12TranslationLayer::EShaderStage::e_PS);
-            BindToPipeline(m_device, m_pixelShaderData.m_extension2, D3D12TranslationLayer::EShaderStage::e_PS);
-            BindToPipeline(m_device, m_pixelShaderData.m_extension3, D3D12TranslationLayer::EShaderStage::e_PS);
+            if (m_vertexShaderData.m_dirty)
+            {
+                BindToPipeline(m_device, m_vertexShaderData.m_extension, D3D12TranslationLayer::EShaderStage::e_VS);
+                m_vertexShaderData.m_dirty = false;
+            }
+
+            if (m_geometryShaderData.m_dirty)
+            {
+                BindToPipeline(m_device, m_geometryShaderData.m_extension, D3D12TranslationLayer::EShaderStage::e_GS);
+                m_geometryShaderData.m_dirty = false;
+            }
+
+            if (m_pixelShaderData.m_dirty)
+            {
+                BindToPipeline(m_device, m_pixelShaderData.m_extension1, D3D12TranslationLayer::EShaderStage::e_PS);
+                BindToPipeline(m_device, m_pixelShaderData.m_extension2, D3D12TranslationLayer::EShaderStage::e_PS);
+                BindToPipeline(m_device, m_pixelShaderData.m_extension3, D3D12TranslationLayer::EShaderStage::e_PS);
+                m_pixelShaderData.m_dirty = false;
+            }
         }
     }
 
     void ConstantsManager::UpdateVertexShaderExtension(const ShaderConv::VSCBExtension& data)
     {
         m_vertexShaderData.m_extension.Version(&data, sizeof(data));
+        m_vertexShaderData.m_dirty = true;
     }
 
     void ConstantsManager::UpdateGeometryShaderExtension(const ShaderConv::VSCBExtension& data)
     {
         m_geometryShaderData.m_extension.Version(&data, sizeof(data));
+        m_geometryShaderData.m_dirty = true;
     }
 
     Result ConstantsManager::UpdatePixelShaderExtension(const ShaderConv::eConstantBuffers extension, const void* pData, size_t dataSize)
@@ -249,6 +265,8 @@ namespace D3D9on12
         }
         assert(dataSize <= UINT_MAX);
         pBinding->Version(pData, static_cast<UINT>(dataSize));
+
+        m_pixelShaderData.m_dirty = true;
 
         return Result::S_SUCCESS;
     }

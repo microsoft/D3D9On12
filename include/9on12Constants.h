@@ -156,6 +156,7 @@ namespace D3D9on12
             void Destroy();
 
             ConstantBufferBinding m_extension;
+            bool m_dirty = true;
         };
 
         struct GeometryShaderConstants
@@ -166,6 +167,7 @@ namespace D3D9on12
             void Destroy();
 
             ConstantBufferBinding m_extension;
+            bool m_dirty = true;
         };
 
         struct PixelShaderConstants : public StageConstants
@@ -180,6 +182,8 @@ namespace D3D9on12
             ConstantBufferBinding m_extension1;
             ConstantBufferBinding m_extension2;
             ConstantBufferBinding m_extension3;
+
+            bool m_dirty = true;
         };
 
     public:
