@@ -255,8 +255,6 @@ namespace D3D9on12
 
     void PipelineState::SetTextureStageState(DWORD dwStage, DWORD dwState, DWORD dwValue)
     {
-        //TODO: early out on redundant sets
-
         // Set the texture stage state
         if (dwStage >= _countof(m_dwTextureStageStates))
         {
@@ -282,16 +280,13 @@ namespace D3D9on12
         }
 
         // check for integer bitfield overflow causing issues with some apps submitting invalid
-        // sampler state values. 
+        // sampler state values. (handling for ADDRESSU/V/W and MAXANISOTROPY is in the switch 
+        // statements below with appropriate defaulting)
         if ((dwState == D3DTSS_MAGFILTER && dwValue >= 16u) ||
             (dwState == D3DTSS_MINFILTER && dwValue >= 16u) ||
-            (dwState == D3DTSS_MIPFILTER && dwValue >= 16u) ||
-            (dwState == D3DTSS_ADDRESSU && dwValue >= 8u) ||
-            (dwState == D3DTSS_ADDRESSV && dwValue >= 8u) ||
-            (dwState == D3DTSS_ADDRESSW && dwValue >= 8u) ||
-            (dwState == D3DTSS_MAXANISOTROPY && dwValue >= 256u))
+            (dwState == D3DTSS_MIPFILTER && dwValue >= 16u))
         {
-	        Check9on12(false);
+            Check9on12(false);
             return;
         }
 
@@ -329,21 +324,41 @@ namespace D3D9on12
             break;
 
         case D3DTSS_ADDRESSU:
+            if (dwValue > D3DTADDRESS_MIRRORONCE)
+            {
+                // some apps pass bad data here that results in device removed. Assume the default value.
+                dwValue = D3DTADDRESS_WRAP;
+            }
             samplerID.AddressU = dwValue;
             m_dirtyFlags.Samplers |= dirtyMask;
             break;
 
         case D3DTSS_ADDRESSV:
+            if (dwValue > D3DTADDRESS_MIRRORONCE)
+            {
+                // some apps pass bad data here that results in device removed. Assume the default value.
+                dwValue = D3DTADDRESS_WRAP;
+            }
             samplerID.AddressV = dwValue;
             m_dirtyFlags.Samplers |= dirtyMask;
             break;
 
         case D3DTSS_ADDRESSW:
+            if (dwValue > D3DTADDRESS_MIRRORONCE)
+            {
+                // some apps pass bad data here that results in device removed. Assume the default value.
+                dwValue = D3DTADDRESS_WRAP;
+            }
             samplerID.AddressW = dwValue;
             m_dirtyFlags.Samplers |= dirtyMask;
             break;
 
         case D3DTSS_MAXANISOTROPY:
+            if (dwValue > cD3D9Caps.MaxAnisotropy)
+            {
+                // some apps pass bad data here that results in device removed. Assume default value
+                dwValue = 1;
+            }
             samplerID.MaxAnisotropy = dwValue;
             m_dirtyFlags.Samplers |= dirtyMask;
             break;
@@ -414,7 +429,6 @@ namespace D3D9on12
                 break;
             }
         }
-
     }
 
     PipelineState::PipelineState(Device& device) :
