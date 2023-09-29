@@ -569,22 +569,22 @@ CContext::Translate_MUL( const CInstr& instr )
 void
 CContext::Translate_RSQ( const CInstr& instr )
 {
-    // rsq  dest, src0
     // mov  s0.z, abs( src0 )
+    // rsq  dest, src0
     // movc dest, s0.z, dest, vec4( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX )
 
     const COperandBase dest = instr.CreateDstOperand();
     const COperandBase src0 = this->EmitSrcOperand( instr, 0 );
 
+    m_pShaderAsm->EmitInstruction(
+        CInstruction(D3D10_SB_OPCODE_MOV,
+            CTempOperandDst(SREG_TMP0, D3D10_SB_OPERAND_4_COMPONENT_MASK_Z),
+            CAbs(src0)));
+
     this->EmitDstInstruction( instr.GetModifiers(),
                               D3D10_SB_OPCODE_RSQ,
                               dest,
                               CAbs( src0 ) );
-
-    m_pShaderAsm->EmitInstruction(
-        CInstruction( D3D10_SB_OPCODE_MOV,
-                      CTempOperandDst( SREG_TMP0, D3D10_SB_OPERAND_4_COMPONENT_MASK_Z ),
-                      CAbs( src0 ) ) );
 
     this->EmitDstInstruction( instr.GetModifiers(),
                               D3D10_SB_OPCODE_MOVC,
@@ -1625,22 +1625,22 @@ CContext::Translate_SGE( const CInstr& instr )
 void
 CContext::Translate_LOG( const CInstr& instr )
 {
-    // log  dest, abs( src0 )
     // mov  s0.x, abs( src0 )
+    // log  dest, abs( src0 )
     // movc dest, s0.x, dest, vec4( -FLT_MAX, -FLT_MAX, -FLT_MAX,-FLT_MAX )
 
     const COperandBase dest = instr.CreateDstOperand();
     const COperandBase src0 = this->EmitSrcOperand( instr, 0 );
 
+    m_pShaderAsm->EmitInstruction(
+        CInstruction(D3D10_SB_OPCODE_MOV,
+            CTempOperandDst(SREG_TMP0, D3D10_SB_OPERAND_4_COMPONENT_MASK_X),
+            CAbs(src0)));
+
     this->EmitDstInstruction( instr.GetModifiers(),
                               D3D10_SB_OPCODE_LOG,
                               dest,
                               CAbs( src0 ) );
-    
-    m_pShaderAsm->EmitInstruction(
-        CInstruction( D3D10_SB_OPCODE_MOV,
-                      CTempOperandDst( SREG_TMP0, D3D10_SB_OPERAND_4_COMPONENT_MASK_X ),
-                      CAbs( src0 ) ) );
 
     this->EmitDstInstruction( instr.GetModifiers(),
                               D3D10_SB_OPCODE_MOVC,
