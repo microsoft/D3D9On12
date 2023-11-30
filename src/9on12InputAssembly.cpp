@@ -185,6 +185,11 @@ namespace D3D9on12
                 break;
         }
 
+        if (drawOffset >= m_sizeInBytes)
+        {
+            return E_INVALIDARG;
+        }
+
 
         const UINT32 drawSize = vertexCount * m_bufferStride;
 
