@@ -185,12 +185,18 @@ namespace D3D9on12
                 break;
         }
 
+        if (drawOffset >= m_sizeInBytes)
+        {
+            return E_INVALIDARG;
+        }
+
 
         const UINT32 drawSize = vertexCount * m_bufferStride;
 
         m_tempGPUBuffer = device.GetSystemMemoryAllocator().Allocate(drawOffset + drawSize);
 
-        memcpy((byte*)m_tempGPUBuffer.m_pMappedAddress + drawOffset, (byte*)GetSystemMemoryBase() + drawOffset, drawSize);
+        UINT32 maxCopySize = m_sizeInBytes - drawOffset;
+        memcpy((byte*)m_tempGPUBuffer.m_pMappedAddress + drawOffset, (byte*)GetSystemMemoryBase() + drawOffset, min(drawSize, maxCopySize));
 
         return S_OK;
     }
