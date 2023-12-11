@@ -40,7 +40,9 @@ namespace D3D9on12
 
         UINT m_bufferStride = 0;
         UINT m_bufferOffset = 0;
-        UINT m_sizeInBytes = 0;
+        // Only used for bounds checking in Upload() when possible. This default may not make sense if that changes.
+        // Primarily a risk due to InputAssembly::Set*BufferUM not knowing buffer size.
+        UINT m_sizeInBytes = UINT32_MAX;
     };
 
     class InputAssembly
