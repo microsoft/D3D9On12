@@ -1506,10 +1506,11 @@ void
 CContext::Translate_RCP( const CInstr& instr )
 {
     // div  dest, vec4( 1.0f ), src0
-    // movc dest, src0, dest, src0
 
     const COperandBase dest = instr.CreateDstOperand();
     const COperandBase src0 = this->EmitSrcOperand( instr, 0 );
+    const DWORD dwToken = instr.GetSrcToken( 0 );
+    const DWORD dwModifier = ( dwToken & D3DSP_SRCMOD_MASK );
 
     this->EmitDstInstruction( instr.GetModifiers(),
                               D3D10_SB_OPCODE_DIV,
@@ -1517,12 +1518,34 @@ CContext::Translate_RCP( const CInstr& instr )
                               COperand( 1.0f ),
                               src0 );
 
-    this->EmitDstInstruction(instr.GetModifiers(),
-        D3D10_SB_OPCODE_MOVC,
-        dest,
-        src0,
-        dest,
-        src0 );
+    if ( dwModifier != D3DSPSM_NONE )
+    {
+        // mov  s0.z, src0
+        // movc dest, src0, dest, vec4( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX )
+
+        m_pShaderAsm->EmitInstruction(
+            CInstruction( D3D10_SB_OPCODE_MOV,
+                CTempOperandDst( SREG_TMP0, D3D10_SB_OPERAND_4_COMPONENT_MASK_Z ),
+                src0 ) );
+
+        this->EmitDstInstruction( instr.GetModifiers(),
+                                  D3D10_SB_OPCODE_MOVC,
+                                  dest,
+                                  CTempOperand4( SREG_TMP0, __SWIZZLE_Z ),
+                                  dest,
+                                  COperand( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX ) );
+    }
+    else
+    {
+        // movc dest, src0, dest, vec4( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX )
+
+        this->EmitDstInstruction( instr.GetModifiers(),
+                                  D3D10_SB_OPCODE_MOVC,
+                                  dest,
+                                  src0,
+                                  dest,
+                                  COperand( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX ) );
+    }
 }
 
 ///---------------------------------------------------------------------------
