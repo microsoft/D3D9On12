@@ -1518,10 +1518,12 @@ CContext::Translate_RCP( const CInstr& instr )
                               COperand( 1.0f ),
                               src0 );
 
-    if ( dwModifier != D3DSPSM_NONE )
+    // movc doesn't allow modifiers on the comparison param, so if src0 has modifiers we need to apply those and mov into a temp register
+    // note that according to spec, rcp can only act on scalar values, so we just mov into r0.z
+    if ( dwModifier != D3DSPSM_NONE ) 
     {
-        // mov  s0.z, src0
-        // movc dest, src0, dest, vec4( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX )
+        // mov  r0.z, src0
+        // movc dest, src0, dest, src0
 
         m_pShaderAsm->EmitInstruction(
             CInstruction( D3D10_SB_OPCODE_MOV,
@@ -1533,18 +1535,18 @@ CContext::Translate_RCP( const CInstr& instr )
                                   dest,
                                   CTempOperand4( SREG_TMP0, __SWIZZLE_Z ),
                                   dest,
-                                  COperand( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX ) );
+                                  src0 );
     }
     else
     {
-        // movc dest, src0, dest, vec4( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX )
+        // movc dest, src0, dest, src0
 
         this->EmitDstInstruction( instr.GetModifiers(),
                                   D3D10_SB_OPCODE_MOVC,
                                   dest,
                                   src0,
                                   dest,
-                                  COperand( FLT_MAX, FLT_MAX, FLT_MAX, FLT_MAX ) );
+                                  src0 );
     }
 }
 
