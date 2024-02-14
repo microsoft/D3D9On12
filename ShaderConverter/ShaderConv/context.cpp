@@ -1523,7 +1523,8 @@ CContext::Translate_RCP( const CInstr& instr )
     if ( dwModifier != D3DSPSM_NONE ) 
     {
         // mov  r0.z, src0
-        // movc dest, src0, dest, src0
+        // movc dest, r0.z, dest, src0
+
 
         m_pShaderAsm->EmitInstruction(
             CInstruction( D3D10_SB_OPCODE_MOV,
