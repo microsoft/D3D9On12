@@ -103,7 +103,8 @@ namespace D3D9on12
             case D3DDDIFMT_SLICECONTROLDATA:
                 return D3D12_VIDEO_DECODE_ARGUMENT_TYPE_SLICE_CONTROL;
             default:
-                return D3D12_VIDEO_DECODE_ARGUMENT_TYPE_MAX_VALID;
+                assert(false);
+                return (D3D12_VIDEO_DECODE_ARGUMENT_TYPE)-1;
             }
         }
 
