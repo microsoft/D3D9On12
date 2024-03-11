@@ -692,8 +692,8 @@ namespace D3D9on12
             RETURN_E_INVALIDARG_AND_CHECK();
         }
 
-        //TODO: Fully implement blit
-        Check9on12(pBltArgs->ColorKey == 0);
+        //TODO: Implement Dest ColorKey blit
+        Check9on12(pBltArgs->ColorKey == 0 || pBltArgs->Flags.DstColorKey==0);
 
         // Copy within the same resource
         if (pSource == pDestination)
@@ -717,6 +717,13 @@ namespace D3D9on12
 
         {
             ResourceCopyArgs resourceCopyArg = ResourceCopyArgs(*pDestination, *pSource);
+
+            D3D12TranslationLayer::BlitColorKey blitColorKey;
+            DirectX::XMFLOAT4 colorKey = ARGBToUNORMFloat(pBltArgs->ColorKey);
+            memcpy(blitColorKey.ColorKey, &colorKey, sizeof(float) * 4);
+            blitColorKey.Type = pBltArgs->Flags.SrcColorKey ? D3D12TranslationLayer::COLORKEY_SRC :
+                                pBltArgs->Flags.DstColorKey ? D3D12TranslationLayer::COLORKEY_DEST :
+                                D3D12TranslationLayer::COLORKEY_NONE;
 
             resourceCopyArg.m_EnableAlpha = EnableAlpha;
             resourceCopyArg.AsSubresourceBlit(pBltArgs->DstSubResourceIndex, pBltArgs->SrcSubResourceIndex, &pBltArgs->DstRect, &pBltArgs->SrcRect);

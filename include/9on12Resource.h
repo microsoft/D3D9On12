@@ -46,6 +46,8 @@ namespace D3D9on12
         Resource& m_source;
 
         BOOL m_EnableAlpha;
+
+        D3D12TranslationLayer::BlitColorKey m_ColorKey;
     };
 
     struct LockRange
