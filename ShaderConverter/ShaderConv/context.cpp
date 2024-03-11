@@ -3627,12 +3627,12 @@ CContext::EmitColorKeyModifier( UINT stage,
     {
         // Apply colorkey
 
-        // eq m0, src, colorkey[i]
-        // and m0.x, m0.x, m0.y
-        // and m0.x, m0.x, m0.z
-        // and m0.x, m0.x, m0.w
-        // (1) discard_nz s0.i
-        // (2) movc dst, m0, zero, src
+        // eq s0, src, colorkey[i]
+        // and s0.x, s0.x, s0.y
+        // and s0.x, s0.x, s0.z
+        // and s0.x, s0.x, s0.w
+        // (1) discard_nz s0.x
+        // (2) movc dst, s0, zero, src
 
         m_pShaderAsm->EmitInstruction(
             CInstruction( D3D10_SB_OPCODE_EQ,
