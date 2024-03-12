@@ -593,8 +593,9 @@ namespace D3D9on12
                 // ResolveSubresource can't handle stretching or sub rects, use a draw to copy instead in these cases
                 const bool mismatchedFormats = srcFormat != DXGI_FORMAT_UNKNOWN && dstFormat != DXGI_FORMAT_UNKNOWN && (ConvertToTypeless(srcFormat) != ConvertToTypeless(dstFormat));
                 const bool channelSwap = source.NeedsSwapRBOutputChannels() != destination.NeedsSwapRBOutputChannels();
-                const bool canUseResolveSubresource = needsMSAAResolve && !mismatchedFormats && !args.m_isStretchCopy && args.m_dimensionsCoverEntireResource;
-                const bool needsStretchCopy = mismatchedFormats || args.m_isStretchCopy || (mismatchingSampleCount && !canUseResolveSubresource) || channelSwap;
+                const bool usesColorKey = args.m_ColorKey.Type == D3D12TranslationLayer::COLORKEY_SRC; //TODO: when COLORKEY_DEST support is added this should be updated
+                const bool canUseResolveSubresource = needsMSAAResolve && !mismatchedFormats && !args.m_isStretchCopy && args.m_dimensionsCoverEntireResource && !usesColorKey;
+                const bool needsStretchCopy = mismatchedFormats || args.m_isStretchCopy || (mismatchingSampleCount && !canUseResolveSubresource) || channelSwap || usesColorKey;
 
                 if (canUseResolveSubresource)
                 {
@@ -645,7 +646,8 @@ namespace D3D9on12
                             dstSubresources, numDstPlanes,
                             dstRect,
                             false,
-                            channelSwap);
+                            channelSwap,
+                            args.m_ColorKey);
                     }
                     else
                     {
@@ -658,7 +660,8 @@ namespace D3D9on12
                             dstSubresources, numDstPlanes,
                             args.m_stretchDestination,
                             args.m_EnableAlpha,
-                            channelSwap);
+                            channelSwap,
+                            args.m_ColorKey);
                     }
 
                     break; // BlitHelper handles planer blits in a single calls.
@@ -718,10 +721,9 @@ namespace D3D9on12
         {
             ResourceCopyArgs resourceCopyArg = ResourceCopyArgs(*pDestination, *pSource);
 
-            D3D12TranslationLayer::BlitColorKey blitColorKey;
             DirectX::XMFLOAT4 colorKey = ARGBToUNORMFloat(pBltArgs->ColorKey);
-            memcpy(blitColorKey.ColorKey, &colorKey, sizeof(float) * 4);
-            blitColorKey.Type = pBltArgs->Flags.SrcColorKey ? D3D12TranslationLayer::COLORKEY_SRC :
+            memcpy(resourceCopyArg.m_ColorKey.ColorKey, &colorKey, sizeof(float) * 4);
+            resourceCopyArg.m_ColorKey.Type = pBltArgs->Flags.SrcColorKey ? D3D12TranslationLayer::COLORKEY_SRC :
                                 pBltArgs->Flags.DstColorKey ? D3D12TranslationLayer::COLORKEY_DEST :
                                 D3D12TranslationLayer::COLORKEY_NONE;
 
