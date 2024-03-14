@@ -1025,7 +1025,11 @@ namespace D3D9on12
 
             const D3D12TranslationLayer::RESOURCE_USAGE UsageFlag = GetResourceUsage(createArgs.Flags, m_CpuAccessFlags);
             D3D12_HEAP_TYPE HeapType = D3D12TranslationLayer::Resource::GetD3D12HeapType(UsageFlag, m_CpuAccessFlags);
-            if (HeapType == D3D12_HEAP_TYPE_UPLOAD && (createArgs.Flags.VertexBuffer || createArgs.Flags.IndexBuffer) &&
+            // We've seen some apps such as Unigine Valley experience corruption on systems with UMA when switching to HeapTypeDefault here, so skipping this optimization in that case for now
+            bool isUMA = m_pParentDevice->GetContext().m_architecture.isUMA;
+            if (!isUMA && 
+                HeapType == D3D12_HEAP_TYPE_UPLOAD &&
+                (createArgs.Flags.VertexBuffer || createArgs.Flags.IndexBuffer) &&
                 createArgs.Flags.HintStatic)
             {
                 HeapType = D3D12_HEAP_TYPE_DEFAULT;
