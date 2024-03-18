@@ -484,6 +484,7 @@ namespace D3D9on12
                     g_AppCompatInfo.MaxAllocatedUploadHeapSpacePerCommandList);
 
             args.MaxSRVHeapSize = min(RegistryConstants::g_cMaxSRVHeapSize, g_AppCompatInfo.MaxSRVHeapSize);
+            args.BufferPoolTrimThreshold = min(RegistryConstants::g_cBufferPoolTrimThreshold, g_AppCompatInfo.BufferPoolTrimThreshold);
 
             if (!RegistryConstants::g_cSingleThread)
             {
