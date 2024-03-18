@@ -28,6 +28,7 @@ namespace D3D9on12
         static const LPCSTR g_cPSOCacheTrimLimitAge = "PSOCacheTrimLimitAge";
         static const LPCSTR g_cMaxAllocatedUploadHeapSpacePerCommandList = "MaxAllocatedUploadHeapSpacePerCommandList";
         static const LPCSTR g_cMaxSRVHeapSize = "MaxSRVHeapSize";
+        static const LPCSTR g_cBufferPoolTrimThreshold = "BufferPoolTrimThreshold"; // Must be in the range 5-100 to be used by the translation layer. If there is a compat shim, will take the lesser of the two values
         static const LPCSTR g_cLockDiscardOptimization = "LockDiscardOptimization";
     };
 
@@ -103,6 +104,7 @@ namespace D3D9on12
         static const DWORD g_cPSOCacheTrimLimitAge = CheckRegistryKeyDWORD(RegistryKeys::g_cPSOCacheTrimLimitAge, MAXDWORD);
         static const DWORD g_cMaxAllocatedUploadHeapSpacePerCommandList = CheckRegistryKeyDWORD(RegistryKeys::g_cMaxAllocatedUploadHeapSpacePerCommandList, MAXDWORD);
         static const DWORD g_cMaxSRVHeapSize = CheckRegistryKeyDWORD(RegistryKeys::g_cMaxSRVHeapSize, MAXDWORD);
+        static const DWORD g_cBufferPoolTrimThreshold = CheckRegistryKeyDWORD(RegistryKeys::g_cBufferPoolTrimThreshold, MAXDWORD);
         static const bool g_cLockDiscardOptimization = CheckRegistryKeyDWORD(RegistryKeys::g_cLockDiscardOptimization, 1);
     };
 };

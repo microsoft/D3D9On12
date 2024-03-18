@@ -286,6 +286,7 @@ typedef struct _D3D9ON12_APP_COMPAT_INFO
     DWORD PSOCacheTrimLimitAge;   // We will only trim PSOs that are older then this age (age in command list age)
     DWORD MaxAllocatedUploadHeapSpacePerCommandList; // Maximum amount of storage allocated for upload operations per command list before flush
     DWORD MaxSRVHeapSize; // Maximum number of entries in the sharer resource view decriptor heap
+    DWORD BufferPoolTrimThreshold; // How many fences (roughly translates to frames) a buffer in the buffer pool is allowed to exist before it is eleigible for being reclaimed. Must be in the range 5-100 to have an effect
 } D3D9ON12_APP_COMPAT_INFO;
 
 typedef void (APIENTRY *PFND3D9ON12_SETAPPCOMPATDATA)(

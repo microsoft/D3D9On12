@@ -11,6 +11,7 @@ namespace D3D9on12
         MAXDWORD, // PSOCacheTrimLimitAge
         MAXDWORD, // MaxAllocatedUploadHeapSpacePerCommandList
         MAXDWORD, // MaxSRVHeapSize
+        MAXDWORD, // BufferPoolTrimThreshold
     };
 
     void APIENTRY SetAppCompatData(const D3D9ON12_APP_COMPAT_INFO *pAppCompatData)
