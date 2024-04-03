@@ -577,7 +577,7 @@ namespace D3D9on12
         switch (dwState)
         {
         case D3DRS_ALPHATESTENABLE:
-            m_rasterStates.SetAlphaTestEnable(dwValue == TRUE);
+            m_rasterStates.SetAlphaTestEnable(dwValue != FALSE);
             break;
         case D3DRS_ALPHAFUNC:
             m_rasterStates.SetAlphaFunc(static_cast<D3DCMPFUNC>(dwValue));
@@ -587,7 +587,7 @@ namespace D3D9on12
             m_dirtyFlags.PSExtension = true;
             break;
         case D3DRS_FOGENABLE:
-            m_rasterStates.SetFogEnable(dwValue == TRUE);
+            m_rasterStates.SetFogEnable(dwValue != FALSE);
             break;
         case D3DRS_FOGCOLOR:
             ConvertToRGB(dwValue, m_PSExtension.vFogColor);
