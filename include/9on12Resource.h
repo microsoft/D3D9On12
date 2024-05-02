@@ -218,7 +218,7 @@ namespace D3D9on12
                     INEFFICIENT_UNBINDING_ARRAY_DELETION();
                 }
 
-                for (UINT i = 0; i < m_boundIndices.size(); i++)
+                for (size_t i = 0; i < m_boundIndices.size(); i++)
                 {
                     if (bindIndex == m_boundIndices[i])
                     {
