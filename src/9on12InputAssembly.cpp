@@ -8,7 +8,7 @@ namespace D3D9on12
     {
         D3D9on12_DDI_ENTRYPOINT_START(TRUE);
         Device* pDevice = Device::GetDeviceFromHandle(hDevice);
-        if (pDevice == nullptr || pStreamSourceArg == nullptr)
+        if (pDevice == nullptr || pStreamSourceArg == nullptr || pStreamSourceArg->Stream >= MAX_VERTEX_STREAMS)
         {
             RETURN_E_INVALIDARG_AND_CHECK();
         }
@@ -24,7 +24,7 @@ namespace D3D9on12
     {
         D3D9on12_DDI_ENTRYPOINT_START(TRUE);
         Device* pDevice = Device::GetDeviceFromHandle(hDevice);
-        if (pDevice == nullptr || pStreamSourceArg == nullptr || pData == nullptr)
+        if (pDevice == nullptr || pStreamSourceArg == nullptr || pData == nullptr || pStreamSourceArg->Stream >= MAX_VERTEX_STREAMS)
         {
             RETURN_E_INVALIDARG_AND_CHECK();
         }
