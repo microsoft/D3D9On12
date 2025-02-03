@@ -613,7 +613,11 @@ namespace D3D9on12
 
     bool Adapter::RequiresYUY2BlitWorkaround() const
     {
-        return m_HWIDs.vendorID == MAKEFOURCC('Q', 'C', 'O', 'M');
+        LARGE_INTEGER driverVersion;
+        driverVersion.QuadPart = m_DriverVersion;
+        // work around only needed when vendor is QCOM and driver version is less than 31.0.0.0.
+        return m_HWIDs.vendorID == MAKEFOURCC('Q', 'C', 'O', 'M')
+            && driverVersion.HighPart < (31 << 16); //Major version is the 16 MSB of the HighPart
     }
 
     void Adapter::LogAdapterCreated( LUID *pluid, HRESULT hr )
