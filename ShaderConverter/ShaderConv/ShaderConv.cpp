@@ -52,8 +52,8 @@ HRESULT ShaderConverterAPI::ConvertTLShader(ConvertTLShaderArgs& args)
     if (SUCCEEDED(hr) && m_pTranslator)
     {
         const CTLVertexShaderDesc desc(args.vsInputDecl, args.shaderSettings);
-        CCodeBlob* pCodeBlob;
-
+        CComPtr<CCodeBlob> pCodeBlob;
+        
         hr = m_pTranslator->TranslateTLVS(&desc, &pCodeBlob);
         if (SUCCEEDED(hr) && pCodeBlob)
         {
@@ -103,7 +103,7 @@ HRESULT ShaderConverterAPI::ConvertShader(ConvertShaderArgs& args)
     VSInputDecls* pVSin = args.pVsInputDecl;
     VSOutputDecls* pVSout = args.pVsOutputDecl;
     const RasterStates& rasterState = args.rasterStates;
-    CCodeBlob* pBlob = nullptr;
+    CComPtr<CCodeBlob> pCodeBlob;
 
     if (m_pTranslator == nullptr)
     {
@@ -135,7 +135,7 @@ HRESULT ShaderConverterAPI::ConvertShader(ConvertShaderArgs& args)
                 *pVSin = pDesc->GetInputDecls();
                 memcpy(pVSout, &pDesc->GetOutputDecls(), sizeof(*pVSout));
 
-                hr = m_pTranslator->TranslateVS(pDesc, rasterState, &pBlob);
+                hr = m_pTranslator->TranslateVS(pDesc, rasterState, &pCodeBlob);
 
                 for (UINT i = 0; i < ARRAYSIZE(args.m_inlineConsts); i++)
                 {
@@ -170,7 +170,7 @@ HRESULT ShaderConverterAPI::ConvertShader(ConvertShaderArgs& args)
 
                     VSOutputDecls updatedInputDecls;
                     pDesc->UpdateInputDecls(*pPSin, rasterState, &updatedInputDecls);
-                    hr = m_pTranslator->TranslatePS(pDesc, rasterState, updatedInputDecls, &pBlob);
+                    hr = m_pTranslator->TranslatePS(pDesc, rasterState, updatedInputDecls, &pCodeBlob);
                     
                     AddAllAddedSystemSemantics(updatedInputDecls, args.AddedSystemSemantics);
 
@@ -192,22 +192,22 @@ HRESULT ShaderConverterAPI::ConvertShader(ConvertShaderArgs& args)
         args.totalInstructionsEmitted = translationData.NumInstructionsEmitted;
         args.totalExtraInstructionsEmitted = translationData.NumExtraInstructionsEmitted;
 
-        if (SUCCEEDED(hr) && pBlob)
+        if (SUCCEEDED(hr) && pCodeBlob)
         {
             // DXBC needs to be 4 byte aligned for dxilconv
             UINT padding = 0;
-            UINT bufferSizeMod4 = pBlob->GetBufferSize() % 4;
+            UINT bufferSizeMod4 = pCodeBlob->GetBufferSize() % 4;
             if (bufferSizeMod4 != 0)
             {
                 padding = 4 - bufferSizeMod4;
             }
-            hr = AllocTemporarySpace(args.convertedByteCode, pBlob->GetBufferSize());
+            hr = AllocTemporarySpace(args.convertedByteCode, pCodeBlob->GetBufferSize());
             if (SUCCEEDED(hr))
             {
-                memcpy(args.convertedByteCode.m_pByteCode, pBlob->GetBufferPointer(), pBlob->GetBufferSize());
+                memcpy(args.convertedByteCode.m_pByteCode, pCodeBlob->GetBufferPointer(), pCodeBlob->GetBufferSize());
                 if (padding > 0)
                 {
-                    ZeroMemory((BYTE*)args.convertedByteCode.m_pByteCode + pBlob->GetBufferSize(), padding);
+                    ZeroMemory((BYTE*)args.convertedByteCode.m_pByteCode + pCodeBlob->GetBufferSize(), padding);
                 }
             }
             else
@@ -215,11 +215,6 @@ HRESULT ShaderConverterAPI::ConvertShader(ConvertShaderArgs& args)
                 Check(false);
             }
         }
-    }
-
-    if (pBlob)
-    {
-        pBlob->Release();
     }
 
     return hr;
@@ -231,7 +226,7 @@ HRESULT ShaderConverterAPI::CreateGeometryShader(CreateGeometryShaderArgs& args)
 
     CGeometryShaderDesc geoDesc = CGeometryShaderDesc(args.m_ApiVersion, args.m_ShaderSettings, args.m_VsOutputDecls, args.m_RasterStates);
 
-    CCodeBlob* pCodeBlob = {};
+    CComPtr<CCodeBlob> pCodeBlob;
 
     // Translate the shader code from HLSL 2.0 to 4.0
     hr = m_pTranslator->TranslateGS(&geoDesc, &pCodeBlob);
