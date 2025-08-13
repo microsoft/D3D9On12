@@ -901,7 +901,7 @@ namespace D3D9on12
                         bool HideSRV = pResource->GetDSVBindingTracker().IsBound() && GetDepthStencilStateID().ZWriteEnable;
 
                         // resources with INTZ surface format, set ZWriteEnable to false instead of hiding SRV
-                        if (HideSRV && (pResource->GetD3DFormat() == D3DFMT_INTZ))
+                        if (!g_AppCompatInfo.DisableIntzDSVFix && HideSRV && (pResource->GetD3DFormat() == D3DFMT_INTZ))
                         {
                             HideSRV = false;
                             SetDepthStencilState(device, D3DRS_ZWRITEENABLE, 0);

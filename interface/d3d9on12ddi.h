@@ -287,6 +287,7 @@ typedef struct _D3D9ON12_APP_COMPAT_INFO
     DWORD MaxAllocatedUploadHeapSpacePerCommandList; // Maximum amount of storage allocated for upload operations per command list before flush
     DWORD MaxSRVHeapSize; // Maximum number of entries in the sharer resource view decriptor heap
     DWORD BufferPoolTrimThreshold; // How many fences (roughly translates to frames) a buffer in the buffer pool is allowed to exist before it is eleigible for being reclaimed. Must be in the range 5-100 to have an effect
+	DWORD DisableIntzDSVFix; // Disables the fix for INTZ DSV also bound as SRV that disables ZWrite instead of hiding SRV. Some apps (ex: GTAIV) actually require the opposite behavior. This is a workaround until "feedback loop" surfaces are possible in d3d12
 } D3D9ON12_APP_COMPAT_INFO;
 
 typedef void (APIENTRY *PFND3D9ON12_SETAPPCOMPATDATA)(
