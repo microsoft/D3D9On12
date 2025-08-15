@@ -12,6 +12,7 @@ namespace D3D9on12
         MAXDWORD, // MaxAllocatedUploadHeapSpacePerCommandList
         MAXDWORD, // MaxSRVHeapSize
         MAXDWORD, // BufferPoolTrimThreshold
+        0,        // DisableIntzDSVFix
     };
 
     void APIENTRY SetAppCompatData(const D3D9ON12_APP_COMPAT_INFO *pAppCompatData)

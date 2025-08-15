@@ -47,7 +47,7 @@ namespace D3D9on12
     {
         // Data uploaded for a draw is only valid for that draw, and should be cleaned up immediately after to prevent
         // successive draws from reading stale/deleted data
-        if (device.GetPipelineState().GetIntzRestoreZWrite())
+        if (!g_AppCompatInfo.DisableIntzDSVFix && device.GetPipelineState().GetIntzRestoreZWrite())
         {
             device.GetPipelineState().GetPixelStage().SetDepthStencilState(device, D3DRS_ZWRITEENABLE, 1);
             device.GetPipelineState().SetIntzRestoreZWrite(false);
