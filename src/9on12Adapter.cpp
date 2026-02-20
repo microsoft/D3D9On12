@@ -281,6 +281,13 @@ namespace D3D9on12
                 // simplicity/efficiency in 9on12's present path
                 m_bSupportsCastingTypelessResources = d3d12Options3.CastingFullyTypedFormatSupported;
 
+                D3D12_FEATURE_DATA_D3D12_OPTIONS13 d3d12Options13 = {};
+                m_bSupportsUnrestrictedBufferTextureCopyPitch = false;
+                if (SUCCEEDED(m_pD3D12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS13, &d3d12Options13, sizeof(d3d12Options13))))
+                {
+                    m_bSupportsUnrestrictedBufferTextureCopyPitch = d3d12Options13.UnrestrictedBufferTextureCopyPitchSupported;
+                }
+
                 if (pArgs && pArgs->NumQueues > 0)
                 {
                     // If a queue is provided, they better have provided the device they created it with

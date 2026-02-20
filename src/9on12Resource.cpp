@@ -900,6 +900,26 @@ namespace D3D9on12
             &m_physicalLinearRepresentation.m_rowPitces[0],
             &m_totalSize);
 
+        // If unrestricted pitch is supported, we can use tighter packing for block compressed resources
+        // instead of the default 256-byte alignment that GetCopyableFootprints applies
+        if (m_pParentDevice->GetAdapter().SupportsUnrestrictedBufferTextureCopyPitch() && IsBlockCompressedFormat(resourceFormat))
+        {
+            m_totalSize = 0;
+            for (UINT subresourceIndex = 0; subresourceIndex < m_numSubresources; subresourceIndex++)
+            {
+                auto& footprint = m_physicalLinearRepresentation.m_footprints[subresourceIndex];
+                
+                UINT minPitch = 0;
+                CD3D11FormatHelper::CalculateMinimumRowMajorRowPitch(footprint.Footprint.Format, footprint.Footprint.Width, minPitch);
+                footprint.Footprint.RowPitch = minPitch;
+                footprint.Offset = m_totalSize;
+                
+                UINT slicePitch = 0;
+                CD3D11FormatHelper::CalculateMinimumRowMajorSlicePitch(footprint.Footprint.Format, footprint.Footprint.RowPitch, footprint.Footprint.Height, slicePitch);
+                m_totalSize += slicePitch * footprint.Footprint.Depth;
+            }
+        }
+
         // We can safely skip initializing app memory information if only the first surf is 
         // initialized because this only happens as when we internally create this resource 
         // and won't be working with any app initial memory
@@ -936,7 +956,7 @@ namespace D3D9on12
                     // To work around this, IHVs pass in an arbitrary BPP for these formats (this seems to always be 8) 
                     // and internally correct the pitch reported by the runtime with a multiplier.
                     // More details in 9on12Caps.h with the caps inclusion of D3DFMT_ATI1/D3DFMT_ATI2
-                    if (IsIHVFormat(createArgs.Format) && IsBlockCompressedFormat(resourceFormat))
+                    if (IsIHVFormat(createArgs.Format) && IsBlockCompressedFormat(resourceFormat) && !m_pParentDevice->GetAdapter().SupportsUnrestrictedBufferTextureCopyPitch())
                     {
                         C_ASSERT(BPP_FOR_IHV_BLOCK_COMPRESSED_FORMATS % 8 == 0);
                         const UINT runtimeCalculatedPitch = GetBlockWidth(resourceFormat) * BPP_FOR_IHV_BLOCK_COMPRESSED_FORMATS / 8;
