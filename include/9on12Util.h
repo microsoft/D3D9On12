@@ -87,6 +87,26 @@ namespace D3D9on12
         Value value;
     };
 
+    //
+    // Translates DXGI error codes to their D3D9 equivalents so that the
+    // correct HRESULTs propagate to the D3D9 runtime.  Non-DXGI codes pass
+    // through unchanged.
+    //
+    // Not an exhuastive list, but the ones most likely to be hit
+    //
+    inline HRESULT TranslateDxgiHrToD3D9(HRESULT hr)
+    {
+        switch (hr)
+        {
+        case DXGI_ERROR_DEVICE_REMOVED:         return D3DERR_DEVICEREMOVED;
+        case DXGI_ERROR_DEVICE_HUNG:            return D3DERR_DEVICEHUNG;
+        case DXGI_ERROR_DEVICE_RESET:           return D3DERR_DEVICELOST;
+        case DXGI_ERROR_DRIVER_INTERNAL_ERROR:  return D3DERR_DRIVERINTERNALERROR;
+        case DXGI_ERROR_INVALID_CALL:           return D3DERR_DRIVERINTERNALERROR; // This is a driver error from the app's perspective as it means that 9on12 made an invalid call
+        default:                                return hr;
+        }
+    }
+
 #define D3D9on12_DDI_ENTRYPOINT_START(implemented) \
 __pragma(warning(suppress:4127)) /* conditional is constant due to constant macro parameter(s) */ \
     if((implemented) == false && RegistryConstants::g_cBreakOnMissingDDI) \
@@ -114,6 +134,7 @@ __pragma(warning(suppress:4127)) /* conditional is constant due to constant macr
     { \
         EntryPointHr = E_OUTOFMEMORY; \
     } \
+    EntryPointHr = TranslateDxgiHrToD3D9(EntryPointHr); \
 
 #define D3D9on12_DDI_ENTRYPOINT_END_AND_RETURN_HR(hr) \
     CLOSE_TRYCATCH_AND_STORE_HRESULT(hr) \
