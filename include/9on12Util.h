@@ -98,7 +98,7 @@ namespace D3D9on12
     {
         switch (hr)
         {
-        case DXGI_ERROR_DEVICE_REMOVED:         return D3DERR_DEVICEREMOVED;
+        case DXGI_ERROR_DEVICE_REMOVED:         return D3DDDIERR_DEVICEREMOVED;
         case DXGI_ERROR_DEVICE_HUNG:            return D3DERR_DEVICEHUNG;
         case DXGI_ERROR_DEVICE_RESET:           return D3DERR_DEVICELOST;
         case DXGI_ERROR_DRIVER_INTERNAL_ERROR:  return D3DERR_DRIVERINTERNALERROR;
