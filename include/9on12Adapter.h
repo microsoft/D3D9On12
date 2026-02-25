@@ -29,7 +29,6 @@ namespace D3D9on12
         ID3D12CommandQueue *GetCommandQueue() { return m_pD3D12CommandQueue; }
 
         bool SupportsCastingTypelessResources() { return m_bSupportsCastingTypelessResources; }
-        bool SupportsUnrestrictedBufferTextureCopyPitch() { return m_bSupportsUnrestrictedBufferTextureCopyPitch; }
         bool RequiresYUY2BlitWorkaround() const;
 
     protected:
@@ -40,7 +39,6 @@ namespace D3D9on12
 
         CONST D3DDDI_ADAPTERCALLBACKS& m_AdapterCallbacks;
         bool m_bSupportsCastingTypelessResources;
-        bool m_bSupportsUnrestrictedBufferTextureCopyPitch;
         Device *m_pDevice;      // weak-ref
 
         CComPtr<ID3D12Device> m_pD3D12Device;

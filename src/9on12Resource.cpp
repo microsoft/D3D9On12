@@ -902,7 +902,7 @@ namespace D3D9on12
 
         // If unrestricted pitch is supported, we can use tighter packing for block compressed resources
         // instead of the default 256-byte alignment that GetCopyableFootprints applies
-        if (m_pParentDevice->GetAdapter().SupportsUnrestrictedBufferTextureCopyPitch() && IsBlockCompressedFormat(resourceFormat))
+        if (m_pParentDevice->GetContext().m_architecture.supportsUnrestrictedBufferTextureCopyPitch && IsBlockCompressedFormat(resourceFormat))
         {
             m_totalSize = 0;
             for (UINT subresourceIndex = 0; subresourceIndex < m_numSubresources; subresourceIndex++)
@@ -956,7 +956,7 @@ namespace D3D9on12
                     // To work around this, IHVs pass in an arbitrary BPP for these formats (this seems to always be 8) 
                     // and internally correct the pitch reported by the runtime with a multiplier.
                     // More details in 9on12Caps.h with the caps inclusion of D3DFMT_ATI1/D3DFMT_ATI2
-                    if (IsIHVFormat(createArgs.Format) && IsBlockCompressedFormat(resourceFormat) && !m_pParentDevice->GetAdapter().SupportsUnrestrictedBufferTextureCopyPitch())
+                    if (IsIHVFormat(createArgs.Format) && IsBlockCompressedFormat(resourceFormat))
                     {
                         C_ASSERT(BPP_FOR_IHV_BLOCK_COMPRESSED_FORMATS % 8 == 0);
                         const UINT runtimeCalculatedPitch = GetBlockWidth(resourceFormat) * BPP_FOR_IHV_BLOCK_COMPRESSED_FORMATS / 8;
