@@ -441,8 +441,6 @@ namespace D3D9on12
 
     static inline D3D12_RECT ConvertBoxToRect(const D3D12_BOX& box)
     {
-        Check9on12(box.front == 0 && box.back == 1);
-
         D3D12_RECT rect =
         {
             static_cast<LONG>(box.left), 
