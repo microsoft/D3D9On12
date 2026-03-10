@@ -900,6 +900,26 @@ namespace D3D9on12
             &m_physicalLinearRepresentation.m_rowPitces[0],
             &m_totalSize);
 
+        // If unrestricted pitch is supported, we can use tighter packing for non-planar resources
+        // instead of the default 256-byte alignment that GetCopyableFootprints applies
+        if (m_pParentDevice->GetContext().GetOptions13().UnrestrictedBufferTextureCopyPitchSupported && m_NonOpaquePlaneCount == 1)
+        {
+            m_totalSize = 0;
+            for (UINT subresourceIndex = 0; subresourceIndex < m_numSubresources; subresourceIndex++)
+            {
+                auto& footprint = m_physicalLinearRepresentation.m_footprints[subresourceIndex];
+
+                UINT minPitch = 0;
+                CD3D11FormatHelper::CalculateMinimumRowMajorRowPitch(footprint.Footprint.Format, footprint.Footprint.Width, minPitch);
+                footprint.Footprint.RowPitch = minPitch;
+                footprint.Offset = m_totalSize;
+
+                UINT slicePitch = 0;
+                CD3D11FormatHelper::CalculateMinimumRowMajorSlicePitch(footprint.Footprint.Format, footprint.Footprint.RowPitch, footprint.Footprint.Height, slicePitch);
+                m_totalSize += slicePitch * footprint.Footprint.Depth;
+            }
+        }
+
         // We can safely skip initializing app memory information if only the first surf is 
         // initialized because this only happens as when we internally create this resource 
         // and won't be working with any app initial memory
