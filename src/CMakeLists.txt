@@ -22,6 +22,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(d3d12translationlayer)
 
+# D3D12TranslationLayer's DxbcParser doesn't link to Microsoft::DirectX-Headers,
+# so d3d12TokenizedProgramFormat.hpp is not on its include path. Fix this by
+# linking dxbcparser to Microsoft::DirectX-Headers which propagates the correct
+# include directories.
+if(TARGET dxbcparser AND TARGET Microsoft::DirectX-Headers)
+    target_link_libraries(dxbcparser PRIVATE Microsoft::DirectX-Headers)
+endif()
+
 target_link_libraries(d3d9on12 d3d12translationlayer_wdk)
 target_link_libraries(d3d9on12 d3d9on12_shaderconv)
 
