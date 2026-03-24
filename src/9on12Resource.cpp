@@ -912,11 +912,12 @@ namespace D3D9on12
                 UINT minPitch = 0;
                 CD3D11FormatHelper::CalculateMinimumRowMajorRowPitch(footprint.Footprint.Format, footprint.Footprint.Width, minPitch);
                 footprint.Footprint.RowPitch = minPitch;
+                m_physicalLinearRepresentation.m_rowPitces[subresourceIndex] = minPitch; // Even though we don't use the m_rowPitches field, keep it consistent with the newly computed RowPitch
                 footprint.Offset = m_totalSize;
 
                 UINT slicePitch = 0;
                 CD3D11FormatHelper::CalculateMinimumRowMajorSlicePitch(footprint.Footprint.Format, footprint.Footprint.RowPitch, footprint.Footprint.Height, slicePitch);
-                m_totalSize += slicePitch * footprint.Footprint.Depth;
+                m_totalSize += UINT64(slicePitch) * footprint.Footprint.Depth;
             }
         }
 
