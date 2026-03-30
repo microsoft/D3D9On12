@@ -240,13 +240,14 @@ namespace D3D9on12
             convertArgs.pPsInputDecl = &vsOutputDecls;
             convertArgs.legacyByteCode.m_pByteCode = m_d3d9ByteCode.m_ptr;
             convertArgs.legacyByteCode.m_byteCodeSize = m_d3d9ByteCode.m_size;
+
+            hr = m_parentDevice.m_ShaderConvAPI.ConvertShader(convertArgs);
+            CHECK_HR(hr);
+
             for (UINT i = 0; i < ARRAYSIZE(newPixelShader.m_inlineConsts); i++)
             {
                 newPixelShader.m_inlineConsts[i] = std::move(convertArgs.m_inlineConsts[i]);
             }
-
-            hr = m_parentDevice.m_ShaderConvAPI.ConvertShader(convertArgs);
-            CHECK_HR(hr);
 
             const bool bVSOutputMatchesPSInput = (convertArgs.AddedSystemSemantics.size() == 0 && !trimmedAnyOutputs);
             DXBCInputSignatureBuilder inputSignatureBuilder;
