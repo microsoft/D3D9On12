@@ -459,10 +459,10 @@ namespace D3D9on12
             { D3DFMT_A2R10G10B10,   __D3DFMTOP_STRECTTOFROM, __DDI_MULTISAMPLE, 0 },
             { D3DFMT_A16B16G16R16F, __D3DFMTOP_STRECTTOFROM, __DDI_MULTISAMPLE, 0 },
             { D3DFMT_R16F, 0, __DDI_MULTISAMPLE, 0 },
-            { D3DFMT_G16R16F, D3DFORMAT_OP_NOALPHABLEND, __DDI_MULTISAMPLE, 0 },
-            { D3DFMT_R32F, D3DFORMAT_OP_NOALPHABLEND, 0, 0 },
-            { D3DFMT_G32R32F, D3DFORMAT_OP_NOALPHABLEND, 0, 0 },
-            { D3DFMT_A32B32G32R32F, D3DFORMAT_OP_NOALPHABLEND, 0, 0 },
+            { D3DFMT_G16R16F, 0, __DDI_MULTISAMPLE, 0 },
+            { D3DFMT_R32F, 0, 0, 0 },
+            { D3DFMT_G32R32F, 0, 0, 0 },
+            { D3DFMT_A32B32G32R32F, 0, 0, 0 },
             { D3DFMT_V8U8, D3DFORMAT_OP_BUMPMAP, __DDI_MULTISAMPLE, 0 },
             { D3DFMT_Q8W8V8U8, D3DFORMAT_OP_BUMPMAP, __DDI_MULTISAMPLE, 0 },
             { D3DFMT_V16U16, D3DFORMAT_OP_BUMPMAP, __DDI_MULTISAMPLE, 0 },
@@ -552,6 +552,15 @@ namespace D3D9on12
                     if (!CD3D11FormatHelper::YUV(dxgiFormatSupport.Format)  && dxgiFormatSupport.Support1 & D3D12_FORMAT_SUPPORT1_RENDER_TARGET && !bIsBumpFormat)
                     {
                         formatOperations |= __D3DFMTOP_RENDERTARGET;
+                    }
+
+                    // If the format supports render target but not blending, report NOALPHABLEND
+                    // so that CheckDeviceFormat with D3DUSAGE_QUERY_POSTPIXELSHADER_BLENDING
+                    // correctly reflects hardware capability.
+                    if ((formatOperations & __D3DFMTOP_RENDERTARGET) &&
+                        !(dxgiFormatSupport.Support1 & D3D12_FORMAT_SUPPORT1_BLENDABLE))
+                    {
+                        formatOperations |= D3DFORMAT_OP_NOALPHABLEND;
                     }
 
                     if (dxgiFormatSupport.Support1 & D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL)
