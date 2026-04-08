@@ -557,7 +557,7 @@ namespace D3D9on12
                     // If the format supports render target but not blending, report NOALPHABLEND
                     // so that CheckDeviceFormat with D3DUSAGE_QUERY_POSTPIXELSHADER_BLENDING
                     // correctly reflects hardware capability.
-                    if ((formatOperations & __D3DFMTOP_RENDERTARGET) &&
+                    if (((formatOperations & __D3DFMTOP_RENDERTARGET) == __D3DFMTOP_RENDERTARGET) &&
                         !(dxgiFormatSupport.Support1 & D3D12_FORMAT_SUPPORT1_BLENDABLE))
                     {
                         formatOperations |= D3DFORMAT_OP_NOALPHABLEND;
