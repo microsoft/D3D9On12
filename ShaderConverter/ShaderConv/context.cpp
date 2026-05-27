@@ -18,6 +18,9 @@ namespace ShaderConv
 /// <summary>
 /// </summary>
 ///---------------------------------------------------------------------------
+#if defined(_CHPE_X86_ARM64_)
+#pragma inline_depth(0)
+#endif
 HRESULT
 CContext::TranslateInstructions()
 {
@@ -442,6 +445,9 @@ CContext::TranslateInstructions()
 
     return S_OK;
 }
+#if defined(_CHPE_X86_ARM64_)
+#pragma inline_depth()
+#endif
 
 ///---------------------------------------------------------------------------
 /// <summary>
