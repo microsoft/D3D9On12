@@ -212,7 +212,8 @@ namespace D3D9on12
             DerivedVertexShaderKey(const ShaderConv::RasterStates& rasterStates, InputLayout& inputLayout, _In_reads_(MAX_VERTEX_STREAMS) UINT* streamFrequencies) : DerivedShaderKey(rasterStates)
             {
                 //memcpy because assignment can add alignment which can throw off hashing
-                memcpy(&m_inputLayoutHash, &inputLayout.GetHash(), sizeof(m_inputLayoutHash));
+                WeakHash inputLayoutHash = inputLayout.GetHash();
+                memcpy(&m_inputLayoutHash, &inputLayoutHash, sizeof(m_inputLayoutHash));
                 memcpy(m_streamFrequencies, streamFrequencies, sizeof(m_streamFrequencies));
 
                 WeakHash hash = HashData(&m_rasterStates, sizeof(m_rasterStates), m_inputLayoutHash);//Add the hash from the IL
