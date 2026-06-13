@@ -231,7 +231,7 @@ namespace D3D9on12
 
                     if (pAdapter)
                     {
-                        CComQIPtr<IDXCoreAdapter> pDXCoreAdapter = pAdapter;
+                        CComQIPtr<IDXCoreAdapter> pDXCoreAdapter = pAdapter.p;
                         ThrowFailure(pDXCoreAdapter->GetProperty(DXCoreAdapterProperty::HardwareID, &m_HWIDs));
                         ThrowFailure(pDXCoreAdapter->GetProperty(DXCoreAdapterProperty::DriverVersion, &m_DriverVersion));
                     }
@@ -242,7 +242,7 @@ namespace D3D9on12
                     ThrowFailure(CreateDXGIFactory2(0, IID_PPV_ARGS(&pFactory)));
                     ThrowFailure(pFactory->EnumAdapterByLuid(*pAdapterLUID, IID_PPV_ARGS(&pAdapter)));
 
-                    CComQIPtr<IDXGIAdapter> pDXGIAdapter = pAdapter;
+                    CComQIPtr<IDXGIAdapter> pDXGIAdapter = pAdapter.p;
                     DXGI_ADAPTER_DESC AdapterDesc;
                     ThrowFailure(pDXGIAdapter->GetDesc(&AdapterDesc));
                     m_HWIDs = { AdapterDesc.VendorId, AdapterDesc.DeviceId, AdapterDesc.SubSysId, AdapterDesc.Revision };
@@ -258,7 +258,8 @@ namespace D3D9on12
                     ThrowFailure(pArgs->pD3D12Device->QueryInterface(&m_pD3D12Device));
 
                     // Ensure the app provided D3D12 runtime matches up with the adapter the 9on12 device is being created ondapterLuid));
-                    ThrowFailure((memcmp(&m_pD3D12Device->GetAdapterLuid(), pAdapterLUID, sizeof(*pAdapterLUID)) == 0) ?
+                    LUID deviceAdapterLuid = m_pD3D12Device->GetAdapterLuid();
+                    ThrowFailure((memcmp(&deviceAdapterLuid, pAdapterLUID, sizeof(*pAdapterLUID)) == 0) ?
                         S_OK : E_FAIL);
                 }
                 else
