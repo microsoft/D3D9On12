@@ -44,7 +44,18 @@ jobs:
       run: cmake -B ${{github.workspace}}/build -DUSE_PIX=OFF -DCMAKE_SYSTEM_VERSION="10.0.26100.0"
 
     - name: Nuget Restore
-      run: nuget restore ${{github.workspace}}/build/D3D9on12.sln
+      shell: pwsh
+      run: |
+        $solutions = @(
+          Get-ChildItem "${{ github.workspace }}/build" -File |
+            Where-Object { $_.Extension -in '.sln', '.slnx' }
+        )
+
+        if ($solutions.Count -ne 1) {
+          throw "Expected exactly one generated solution, found $($solutions.Count): $($solutions.FullName -join ', ')"
+        }
+
+        nuget restore $solutions[0].FullName
 
     - name: Build
       # Build your program with the given configuration
