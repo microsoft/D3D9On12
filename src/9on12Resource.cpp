@@ -2203,6 +2203,7 @@ namespace D3D9on12
 
         Resource* pResource = Resource::GetResourceFromHandle(hResource);
 
+        pDevice->GetContext().GetCommandListManager(D3D12TranslationLayer::COMMAND_LIST_TYPE::GRAPHICS)->SetNeedSubmitFence();
         D3D12TranslationLayer::CCurrentResourceState::ExclusiveState ExclusiveState = {};
         ExclusiveState.FenceValue = pDevice->GetContext().GetCommandListID(D3D12TranslationLayer::COMMAND_LIST_TYPE::GRAPHICS);
         ExclusiveState.CommandListType = D3D12TranslationLayer::COMMAND_LIST_TYPE::GRAPHICS;
