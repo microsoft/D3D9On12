@@ -672,8 +672,7 @@ namespace D3D9on12
             if (m_pRenderTargets[i].m_pResource)
             {
                 ppRTVs[i] = m_pRenderTargets[i].m_pResource->GetRenderTargetView(m_pRenderTargets[i].m_subresource, m_SRGBWriteEnabled);
-                psoDesc.RTVFormats[i] = m_pRenderTargets[i].m_pResource ? m_pRenderTargets[i].m_pResource->GetViewFormat(m_SRGBWriteEnabled) :
-                    DXGI_FORMAT_UNKNOWN;
+                psoDesc.RTVFormats[i] = ppRTVs[i] ? ppRTVs[i]->GetDesc12().Format : m_pRenderTargets[i].m_pResource->GetViewFormat(false);
             }
         }
 

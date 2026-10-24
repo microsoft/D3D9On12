@@ -1758,7 +1758,7 @@ namespace D3D9on12
             // "Only the formats that pass the CheckDeviceFormat with the usage flag D3DUSAGE_QUERY_SRGBWRITE 
             // can be linearized. The render state D3DRS_SRGBWRITEENABLE is ignored for the rest."
             // https://msdn.microsoft.com/en-us/library/windows/desktop/bb173460(v=vs.85).aspx
-            if (srgbEnabled && IsSRGBCompatible(m_desc.Format))
+            if (srgbEnabled && !m_SRGBRenderTargetViews.empty())
             {
                 Check9on12(subresourceIndex < m_SRGBRenderTargetViews.size());
                 return m_SRGBRenderTargetViews[subresourceIndex].get();
