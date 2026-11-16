@@ -20,7 +20,7 @@ namespace D3D9on12
 
         static void ReportError(HRESULT /*hr*/) {};
 
-        HRESULT Init(ID3D12Device *pDevice, ID3D12CommandQueue *pCommandQueue);
+        HRESULT Init(ID3D12Device16 *pDevice, ID3D12CommandQueue *pCommandQueue);
 
         HRESULT Destroy();
         HRESULT FlushWork(bool WaitOnCompletion, UINT FlushFlags = 0);
@@ -69,10 +69,10 @@ namespace D3D9on12
         D3DDDI_DEVICECALLBACKS& GetRuntimeCallbacks() { return m_Callbacks; }
 
         ID3D12CommandQueue& GetCommandQueue(){ return *m_pCommandQueue; }
-        ID3D12Device &GetDevice() { return *m_pDevice; }
+        ID3D12Device16 &GetDevice() { return *m_pDevice; }
         D3D_FEATURE_LEVEL GetFeatureLevel() { return GetContext().FeatureLevel();}
         
-        CComPtr<ID3D12Device> m_pDevice;
+        CComPtr<ID3D12Device16> m_pDevice;
         CComPtr<ID3D12CommandQueue> m_pCommandQueue;
 
         D3D12TranslationLayer::ImmediateContext& GetContext() { return *m_pImmediateContext; }

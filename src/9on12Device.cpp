@@ -449,7 +449,7 @@ namespace D3D9on12
         return S_OK;
     }
 
-    HRESULT Device::Init(ID3D12Device *pDevice, ID3D12CommandQueue *pCommandQueue)
+    HRESULT Device::Init(ID3D12Device16 *pDevice, ID3D12CommandQueue *pCommandQueue)
     {
         HRESULT hr = S_OK;
         
@@ -461,7 +461,7 @@ namespace D3D9on12
 
         if (SUCCEEDED(hr))
         {
-            hr = GetDevice().CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS, &FeatureDataD3D12, sizeof(D3D12_FEATURE_DATA_D3D12_OPTIONS));
+            hr = GetDevice().CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS, &FeatureDataD3D12, sizeof(D3D12_FEATURE_DATA_D3D12_OPTIONS), D3D12_SDK_VERSION);
             CHECK_HR(hr);
         }
 
@@ -521,7 +521,7 @@ namespace D3D9on12
             m_Adapter.DeviceCreated(this);
         }
 
-        (void)GetDevice().CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS19, &m_Options19, sizeof(m_Options19));
+        (void)GetDevice().CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS19, &m_Options19, sizeof(m_Options19), D3D12_SDK_VERSION);
         return hr;
     }
 

@@ -25,7 +25,7 @@ namespace D3D9on12
         static const UINT MAX_SURFACE_FORMATS = 48;
         UINT GetFormatData(FORMATOP* pFormatOPs, UINT uiNumFormats = 0);
 
-        ID3D12Device *GetDevice() { return m_pD3D12Device; }
+        ID3D12Device16 *GetDevice() { return m_pD3D12Device; }
         ID3D12CommandQueue *GetCommandQueue() { return m_pD3D12CommandQueue; }
 
         bool SupportsCastingTypelessResources() { return m_bSupportsCastingTypelessResources; }
@@ -41,7 +41,7 @@ namespace D3D9on12
         bool m_bSupportsCastingTypelessResources;
         Device *m_pDevice;      // weak-ref
 
-        CComPtr<ID3D12Device> m_pD3D12Device;
+        CComPtr<ID3D12Device16> m_pD3D12Device;
         CComPtr<ID3D12CommandQueue> m_pD3D12CommandQueue;
         DXCoreHardwareID m_HWIDs;
         uint64_t m_DriverVersion;
