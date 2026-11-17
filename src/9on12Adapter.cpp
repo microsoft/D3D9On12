@@ -43,7 +43,7 @@ namespace D3D9on12
                     D3D12_MULTISAMPLE_QUALITY_LEVELS_FLAG_NONE,
                     1 // Default num quality levels of 1
                 };
-                (void)pAdapter->GetDevice()->CheckFeatureSupport(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &MSQL, sizeof(MSQL));
+                (void)pAdapter->GetDevice()->CheckFeatureSupport1(D3D12_FEATURE_MULTISAMPLE_QUALITY_LEVELS, &MSQL, sizeof(MSQL), D3D12_SDK_VERSION);
                 pMSQL->QualityLevels = MSQL.NumQualityLevels;
                 break;
             }
@@ -274,7 +274,7 @@ namespace D3D9on12
                 }
 
                 D3D12_FEATURE_DATA_D3D12_OPTIONS3 d3d12Options3;
-                hr = m_pD3D12Device->CheckFeatureSupport(D3D12_FEATURE_D3D12_OPTIONS3, &d3d12Options3, sizeof(d3d12Options3));
+                hr = m_pD3D12Device->CheckFeatureSupport1(D3D12_FEATURE_D3D12_OPTIONS3, &d3d12Options3, sizeof(d3d12Options3), D3D12_SDK_VERSION);
                 ThrowFailure(hr);
 
                 // TODO: 12281030 Once QC updates the BSP to have this on by default, just throw when
@@ -541,7 +541,7 @@ namespace D3D9on12
             if (!bFormatUsesSpecialHandling)
             {
                 dxgiFormatSupport.Format = ConvertToDXGIFORMAT(formatEntry.dwFourCC);
-                bD3D12SupportsFormat = SUCCEEDED(m_pD3D12Device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &dxgiFormatSupport, sizeof(dxgiFormatSupport)));
+                bD3D12SupportsFormat = SUCCEEDED(m_pD3D12Device->CheckFeatureSupport1(D3D12_FEATURE_FORMAT_SUPPORT, &dxgiFormatSupport, sizeof(dxgiFormatSupport), D3D12_SDK_VERSION));
 
                 if (bD3D12SupportsFormat)
                 {
@@ -572,7 +572,7 @@ namespace D3D9on12
                     {
                         D3D12_FEATURE_DATA_FORMAT_SUPPORT srvFormatSupport;
                         srvFormatSupport.Format = ConvertDepthFormatToCompanionSRVFormat(dxgiFormatSupport.Format);
-                        ThrowFailure(m_pD3D12Device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &srvFormatSupport, sizeof(srvFormatSupport)));
+                        ThrowFailure(m_pD3D12Device->CheckFeatureSupport1(D3D12_FEATURE_FORMAT_SUPPORT, &srvFormatSupport, sizeof(srvFormatSupport), D3D12_SDK_VERSION));
 
                         formatOperations |= GetSRVSupportFlags(srvFormatSupport);
                     }
